@@ -1,12 +1,22 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+import MobileNavBar from "@/components/MobileNavBar";
 
 const Index = () => {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background">
-      <div className="text-center">
-        <h1 className="mb-4 text-4xl font-bold">Welcome to Your Blank App</h1>
-        <p className="text-xl text-muted-foreground">Start building your amazing project here!</p>
+    <div className="min-h-screen bg-background pb-24">
+      <div className="container mx-auto px-4 pt-8">
+        <h1 className="text-2xl font-bold text-foreground">Home</h1>
+        <p className="mt-2 text-muted-foreground">Welcome to your app!</p>
+        
+        <div className="mt-8 grid gap-4">
+          <div className="rounded-xl bg-card p-4 shadow-sm">
+            <h2 className="font-semibold text-card-foreground">Getting Started</h2>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Try clicking the different navigation buttons below to see the glowing effect.
+            </p>
+          </div>
+        </div>
       </div>
+      <MobileNavBar />
     </div>
   );
 };
