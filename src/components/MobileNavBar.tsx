@@ -6,14 +6,13 @@ import { cn } from "@/lib/utils";
 interface NavItem {
   id: string;
   label: string;
-  icon: React.ComponentType<{ className?: string }>;
+  icon: typeof Home;
   path: string;
 }
 
 const navItems: NavItem[] = [
   { id: "home", label: "Home", icon: Home, path: "/" },
   { id: "search", label: "Search", icon: Search, path: "/search" },
-  { id: "menu", label: "Menu", icon: () => null, path: "/menu" },
   { id: "recent", label: "Recent", icon: History, path: "/recent" },
   { id: "profile", label: "Profile", icon: User, path: "/profile" },
 ];
@@ -23,114 +22,166 @@ const MobileNavBar = () => {
   const navigate = useNavigate();
 
   const isActive = (path: string) => location.pathname === path;
+  const isMenuActive = location.pathname === "/menu";
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 px-4 pb-4 md:hidden">
+    <nav className="fixed bottom-0 left-0 right-0 z-50 px-4 pb-4">
       <div className="relative mx-auto max-w-md">
-        {/* Main nav bar */}
-        <div className="relative flex items-center justify-around rounded-[2rem] bg-[hsl(var(--nav-background))] px-4 py-3">
-          {navItems.map((item) => {
-            const active = isActive(item.path);
-            
-            // Center menu button with logo
-            if (item.id === "menu") {
+        {/* Main nav bar container */}
+        <div className="relative flex items-end justify-center">
+          {/* Dark rounded bar */}
+          <div className="flex w-full items-center justify-around rounded-[2rem] bg-[hsl(var(--nav-background))] px-6 py-4">
+            {/* Left side buttons */}
+            {navItems.slice(0, 2).map((item) => {
+              const active = isActive(item.path);
+              const Icon = item.icon;
+              
               return (
                 <button
                   key={item.id}
                   onClick={() => navigate(item.path)}
-                  className="relative -mt-8 flex flex-col items-center"
+                  className="relative flex flex-col items-center gap-1.5"
                 >
-                  {/* Glow effect behind logo */}
-                  <div
-                    className={cn(
-                      "absolute inset-0 -top-2 rounded-full blur-xl transition-opacity duration-300",
-                      active ? "opacity-100" : "opacity-0"
-                    )}
-                    style={{
-                      background: `radial-gradient(circle, hsl(var(--nav-glow) / 0.8) 0%, transparent 70%)`,
-                      width: "80px",
-                      height: "80px",
-                      transform: "translate(-50%, -20%)",
-                      left: "50%",
-                    }}
-                  />
-                  
-                  {/* Logo container */}
-                  <div
-                    className={cn(
-                      "relative flex h-16 w-16 items-center justify-center rounded-full border-4 transition-all duration-300",
-                      active
-                        ? "border-primary glow-pulse"
-                        : "border-[hsl(var(--nav-foreground)/0.3)]"
-                    )}
-                    style={{
-                      background: `linear-gradient(135deg, hsl(var(--nav-background)) 0%, hsl(0 0% 12%) 100%)`,
-                    }}
-                  >
-                    <img
-                      src={logo}
-                      alt="Menu"
-                      className={cn(
-                        "h-8 w-8 transition-all duration-300",
-                        active ? "glow-orange" : "opacity-70"
-                      )}
+                  {/* Glow effect */}
+                  {active && (
+                    <div
+                      className="absolute -top-2 h-10 w-10 rounded-full glow-pulse"
+                      style={{
+                        background: `radial-gradient(circle, hsl(var(--nav-glow) / 0.5) 0%, transparent 70%)`,
+                      }}
                     />
-                  </div>
+                  )}
+                  
+                  <Icon
+                    className={cn(
+                      "relative h-7 w-7 transition-all duration-300",
+                      active
+                        ? "text-primary glow-orange fill-primary"
+                        : "text-[hsl(var(--nav-foreground))]"
+                    )}
+                    strokeWidth={active ? 2 : 1.5}
+                    fill={active ? "currentColor" : "none"}
+                  />
                   
                   <span
                     className={cn(
-                      "mt-1 text-xs font-medium transition-colors duration-300",
+                      "text-sm font-medium transition-colors duration-300",
                       active
                         ? "text-primary"
-                        : "text-[hsl(var(--nav-foreground)/0.7)]"
+                        : "text-[hsl(var(--nav-foreground))]"
                     )}
                   >
                     {item.label}
                   </span>
                 </button>
               );
-            }
+            })}
 
-            // Regular nav items
-            const Icon = item.icon;
-            return (
-              <button
-                key={item.id}
-                onClick={() => navigate(item.path)}
-                className="relative flex flex-col items-center gap-1 px-3 py-1"
-              >
-                {/* Glow effect */}
-                {active && (
-                  <div
-                    className="absolute -top-1 h-8 w-8 rounded-full blur-md glow-pulse"
-                    style={{
-                      background: `radial-gradient(circle, hsl(var(--nav-glow) / 0.6) 0%, transparent 70%)`,
-                    }}
-                  />
-                )}
-                
-                <Icon
-                  className={cn(
-                    "relative h-6 w-6 transition-all duration-300",
-                    active
-                      ? "text-primary glow-orange"
-                      : "text-[hsl(var(--nav-foreground)/0.7)]"
-                  )}
-                />
-                
-                <span
-                  className={cn(
-                    "text-xs font-medium transition-colors duration-300",
-                    active
-                      ? "text-primary"
-                      : "text-[hsl(var(--nav-foreground)/0.7)]"
-                  )}
+            {/* Center Menu button - spacer */}
+            <div className="w-20" />
+
+            {/* Right side buttons */}
+            {navItems.slice(2).map((item) => {
+              const active = isActive(item.path);
+              const Icon = item.icon;
+              
+              return (
+                <button
+                  key={item.id}
+                  onClick={() => navigate(item.path)}
+                  className="relative flex flex-col items-center gap-1.5"
                 >
-                  {item.label}
-                </span>
-              </button>
-            );
-          })}
+                  {/* Glow effect */}
+                  {active && (
+                    <div
+                      className="absolute -top-2 h-10 w-10 rounded-full glow-pulse"
+                      style={{
+                        background: `radial-gradient(circle, hsl(var(--nav-glow) / 0.5) 0%, transparent 70%)`,
+                      }}
+                    />
+                  )}
+                  
+                  <Icon
+                    className={cn(
+                      "relative h-7 w-7 transition-all duration-300",
+                      active
+                        ? "text-primary glow-orange fill-primary"
+                        : "text-[hsl(var(--nav-foreground))]"
+                    )}
+                    strokeWidth={active ? 2 : 1.5}
+                    fill={active ? "currentColor" : "none"}
+                  />
+                  
+                  <span
+                    className={cn(
+                      "text-sm font-medium transition-colors duration-300",
+                      active
+                        ? "text-primary"
+                        : "text-[hsl(var(--nav-foreground))]"
+                    )}
+                  >
+                    {item.label}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Center Menu button - floating above the bar */}
+          <button
+            onClick={() => navigate("/menu")}
+            className="absolute left-1/2 -translate-x-1/2 bottom-6 flex flex-col items-center"
+          >
+            {/* Orange glow behind */}
+            <div
+              className={cn(
+                "absolute rounded-full transition-opacity duration-300 glow-pulse",
+                isMenuActive ? "opacity-100" : "opacity-70"
+              )}
+              style={{
+                background: `radial-gradient(circle, hsl(var(--nav-glow) / 0.8) 0%, hsl(var(--nav-glow) / 0.4) 40%, transparent 70%)`,
+                width: "100px",
+                height: "100px",
+                top: "-10px",
+                left: "50%",
+                transform: "translateX(-50%)",
+              }}
+            />
+            
+            {/* Logo circle */}
+            <div
+              className={cn(
+                "relative flex h-[72px] w-[72px] items-center justify-center rounded-full border-[3px] transition-all duration-300",
+                isMenuActive
+                  ? "border-primary"
+                  : "border-primary/80"
+              )}
+              style={{
+                background: "linear-gradient(180deg, hsl(0 0% 15%) 0%, hsl(0 0% 8%) 100%)",
+                boxShadow: `0 0 30px hsl(var(--nav-glow) / 0.6), inset 0 0 20px hsl(0 0% 0% / 0.3)`,
+              }}
+            >
+              <img
+                src={logo}
+                alt="Menu"
+                className="h-9 w-9 glow-orange"
+                style={{
+                  filter: `drop-shadow(0 0 8px hsl(var(--nav-glow))) drop-shadow(0 0 20px hsl(var(--nav-glow) / 0.5))`,
+                }}
+              />
+            </div>
+            
+            <span
+              className={cn(
+                "mt-1 text-sm font-medium transition-colors duration-300",
+                isMenuActive
+                  ? "text-primary"
+                  : "text-[hsl(var(--nav-foreground))]"
+              )}
+            >
+              Menu
+            </span>
+          </button>
         </div>
       </div>
     </nav>
