@@ -60,15 +60,14 @@ const MobileNavBar = () => {
   const getIconColor = (active: boolean) => active ? activeColor : inactiveColor;
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 px-4 pb-4">
-      <div className="relative mx-auto max-w-md">
+    <nav className="fixed bottom-0 left-0 right-0 z-50">
+      <div className="relative">
         <div className="relative flex items-end justify-center">
-          {/* Navbar with flat top corners, rounded bottom and sides */}
+          {/* Navbar edge-to-edge */}
           <div 
             className="flex w-full items-center justify-around px-6 py-4"
             style={{
               background: `hsl(var(--colors-background-main, 0 0% 8%))`,
-              borderRadius: '12px 12px 32px 32px'
             }}
           >
             {/* Left side buttons */}
