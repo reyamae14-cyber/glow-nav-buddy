@@ -131,7 +131,7 @@ const MobileNavBar = () => {
             
             {/* Logo circle */}
             <div
-              className="relative flex h-[72px] w-[72px] items-center justify-center rounded-full border-[3px] border-primary overflow-hidden"
+              className="relative flex h-[80px] w-[80px] items-center justify-center rounded-full border-[3px] border-primary overflow-hidden p-[20%]"
               style={{
                 background: "linear-gradient(180deg, hsl(0 0% 12%) 0%, hsl(0 0% 5%) 100%)",
                 boxShadow: `0 0 25px hsl(var(--nav-glow) / 0.5)`,
@@ -140,7 +140,7 @@ const MobileNavBar = () => {
               <img
                 src={logo}
                 alt="Menu"
-                className="h-10 w-10 object-contain"
+                className="h-full w-full object-contain"
               />
             </div>
             
