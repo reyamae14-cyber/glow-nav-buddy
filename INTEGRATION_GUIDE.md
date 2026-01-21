@@ -1,17 +1,71 @@
-# MobileNavBar Integration Guide for p-stream
+# P-Stream Mobile Navigation Bar - Complete Integration Guide
 
-## 🤖 AI INSTRUCTIONS
-
-**IMPORTANT: This guide contains all files and instructions needed to integrate the navigation components into the p-stream project. Copy each file exactly as shown.**
+> **⚠️ IMPORTANT: DO NOT MODIFY NAVBAR DIMENSIONS**  
+> The navbar sizes, spacing, and layout are fully optimized for mobile displays.  
+> Do not change: icon sizes (h-7 w-7, h-9 w-9), button sizes (w-[72px] h-[72px]), spacing (py-4, w-20), or positioning (-top-9, bottom-4).
 
 ---
 
-## 📁 FILE 1: MobileNavBar.tsx
+## 📁 Required Files
 
-**Path:** `src/components/MobileNavBar.tsx`
+Copy these files to your project:
+
+1. `src/components/MobileNavBar.tsx` - Main navigation bar
+2. `src/components/MenuPopup.tsx` - Floating menu popup
+3. `src/assets/nexus-logo.svg` - Menu button logo
+
+---
+
+## 📦 Dependencies
+
+```bash
+npm install react-router-dom lucide-react
+```
+
+---
+
+## 🎨 Theme Integration
+
+The navbar reads colors from CSS variables on `document.documentElement`. Your theme store must inject these variables.
+
+### Required CSS Variables (HSL format WITHOUT `hsl()` wrapper)
+
+| Variable | Purpose | Example Value |
+|----------|---------|---------------|
+| `--colors-buttons-list` | Inactive icon/text color | `0 0% 60%` |
+| `--colors-buttons-active` | Active icon/text + glow | `25 95% 53%` |
+| `--colors-background-main` | Navbar background | `0 0% 8%` |
+| `--colors-type-text` | Menu popup text | `0 0% 95%` |
+
+### Add to Your Theme Store (useThemeStore.ts)
+
+```typescript
+import { useEffect } from 'react';
+
+// Inside your theme store or provider:
+useEffect(() => {
+  const theme = currentTheme; // Your active theme object
+  const root = document.documentElement;
+  
+  // Inject CSS variables for navbar
+  root.style.setProperty("--colors-buttons-list", theme.buttons?.list || "0 0% 60%");
+  root.style.setProperty("--colors-buttons-active", theme.buttons?.active || "25 95% 53%");
+  root.style.setProperty("--colors-background-main", theme.background?.main || "0 0% 8%");
+  root.style.setProperty("--colors-type-text", theme.type?.text || "0 0% 95%");
+  
+  // Dispatch event to notify navbar of theme change
+  window.dispatchEvent(new Event("theme-change"));
+}, [currentTheme]);
+```
+
+---
+
+## 📋 Complete Component Code
+
+### MobileNavBar.tsx
 
 ```tsx
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Home, Search, History, User } from "lucide-react";
 import nexusLogo from "@/assets/nexus-logo.svg";
@@ -34,26 +88,39 @@ const navItems: NavItem[] = [
 /**
  * MobileNavBar Component for p-stream
  * 
- * Reads theme colors from CSS variables injected by p-stream's theme store.
- * 
- * Required CSS variables:
- * - --colors-buttons-list: Inactive icon/text color (gray)
- * - --colors-buttons-active: Active icon/text color (theme primary)
- * - --colors-background-main: Dark background color
+ * OPTIMIZED DIMENSIONS - DO NOT CHANGE:
+ * - Icons: h-7 w-7 (28px)
+ * - Menu logo: h-9 w-9 (36px)
+ * - Menu button: w-[72px] h-[72px]
+ * - Menu button position: -top-9 (half in/half out of navbar)
+ * - Navbar padding: py-4
+ * - Center spacer: w-20
+ * - Label position: bottom-4
  */
 const MobileNavBar = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [, setThemeUpdate] = useState(0);
 
   const isActive = (path: string) => location.pathname === path;
   const isMenuActive = location.pathname === "/menu";
 
-  const getComputedColor = (varName: string, fallback: string) => {
+  // Read colors from CSS variables
+  const getComputedColor = useCallback((varName: string, fallback: string) => {
     if (typeof window === "undefined") return fallback;
     const value = getComputedStyle(document.documentElement).getPropertyValue(varName).trim();
     return value || fallback;
-  };
+  }, []);
+
+  // Listen for theme changes from theme store
+  useEffect(() => {
+    const handleThemeChange = () => {
+      setThemeUpdate((prev) => prev + 1);
+    };
+    window.addEventListener("theme-change", handleThemeChange);
+    return () => window.removeEventListener("theme-change", handleThemeChange);
+  }, []);
 
   const inactiveHsl = getComputedColor("--colors-buttons-list", "0 0% 60%");
   const activeHsl = getComputedColor("--colors-buttons-active", "25 95% 53%");
@@ -65,14 +132,14 @@ const MobileNavBar = () => {
   const getIconColor = (active: boolean) => active ? activeColor : inactiveColor;
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 px-4 pb-4">
-      <div className="relative mx-auto max-w-md">
+    <nav className="fixed bottom-0 left-0 right-0 z-50">
+      <div className="relative">
         <div className="relative flex items-end justify-center">
+          {/* Navbar edge-to-edge */}
           <div 
-            className="flex w-full items-center justify-around px-6 py-4"
+            className="flex w-full items-center justify-evenly py-4"
             style={{
               background: `hsl(var(--colors-background-main, 0 0% 8%))`,
-              borderRadius: '12px 12px 32px 32px'
             }}
           >
             {/* Left side buttons */}
@@ -102,7 +169,7 @@ const MobileNavBar = () => {
               );
             })}
 
-            {/* Center Menu button spacer */}
+            {/* Center Menu button - spacer */}
             <div className="w-20" />
 
             {/* Right side buttons */}
@@ -133,23 +200,29 @@ const MobileNavBar = () => {
             })}
           </div>
 
-          {/* Center Menu button */}
+          {/* Center Menu button - floating circle (half in/half out) */}
           <button
             onClick={() => setIsMenuOpen(true)}
-            className="absolute left-1/2 -translate-x-1/2 bottom-4 flex flex-col items-center active:scale-95 transition-transform duration-150"
+            className="absolute left-1/2 -translate-x-1/2 -top-9 flex items-center justify-center active:scale-95 transition-transform duration-150"
           >
             <div
-              className="relative flex items-center justify-center w-14 h-14 rounded-full glow-pulse -mt-10"
+              className="relative flex items-center justify-center w-[72px] h-[72px] rounded-full glow-pulse"
               style={{
                 background: `hsl(var(--colors-background-main, 0 0% 8%))`,
                 boxShadow: `0 0 15px 3px hsl(${menuGlowColor}), 0 0 30px 8px hsl(${menuGlowColor} / 0.5), 0 0 45px 12px hsl(${menuGlowColor} / 0.3)`,
               }}
             >
-              <img src={nexusLogo} alt="Menu" className="h-7 w-7" />
+              <img src={nexusLogo} alt="Menu" className="h-9 w-9" />
             </div>
+          </button>
 
+          {/* Menu text label - aligned with other nav labels */}
+          <button
+            onClick={() => setIsMenuOpen(true)}
+            className="absolute left-1/2 -translate-x-1/2 bottom-4 flex flex-col items-center"
+          >
             <span
-              className="text-sm font-medium transition-colors duration-300 mt-1"
+              className="text-sm font-medium transition-colors duration-300"
               style={{ color: isMenuOpen || isMenuActive ? activeColor : inactiveColor }}
             >
               Menu
@@ -158,6 +231,7 @@ const MobileNavBar = () => {
         </div>
       </div>
       
+      {/* Menu Popup */}
       <MenuPopup isOpen={isMenuOpen} onClose={() => setIsMenuOpen(false)} />
     </nav>
   );
@@ -166,11 +240,7 @@ const MobileNavBar = () => {
 export default MobileNavBar;
 ```
 
----
-
-## 📁 FILE 2: MenuPopup.tsx
-
-**Path:** `src/components/MenuPopup.tsx`
+### MenuPopup.tsx
 
 ```tsx
 import { useNavigate } from "react-router-dom";
@@ -189,6 +259,14 @@ const menuItems = [
   { id: "settings", label: "Settings", path: "/settings", emoji: "⚙️" },
 ];
 
+/**
+ * MenuPopup Component for p-stream
+ * 
+ * Required CSS variables:
+ * - --colors-background-main: Dark background
+ * - --colors-buttons-active: Accent color for header bar
+ * - --colors-type-text: Text color
+ */
 const MenuPopup = ({ isOpen, onClose }: MenuPopupProps) => {
   const navigate = useNavigate();
   
@@ -256,189 +334,60 @@ export default MenuPopup;
 
 ---
 
-## 📁 FILE 3: NavLink.tsx
-
-**Path:** `src/components/NavLink.tsx`
-
-```tsx
-import { NavLink as RouterNavLink, NavLinkProps } from "react-router-dom";
-import { forwardRef } from "react";
-import { cn } from "@/lib/utils";
-
-interface NavLinkCompatProps extends Omit<NavLinkProps, "className"> {
-  className?: string;
-  activeClassName?: string;
-  pendingClassName?: string;
-}
-
-const NavLink = forwardRef<HTMLAnchorElement, NavLinkCompatProps>(
-  ({ className, activeClassName, pendingClassName, to, ...props }, ref) => {
-    return (
-      <RouterNavLink
-        ref={ref}
-        to={to}
-        className={({ isActive, isPending }) =>
-          cn(className, isActive && activeClassName, isPending && pendingClassName)
-        }
-        {...props}
-      />
-    );
-  },
-);
-
-NavLink.displayName = "NavLink";
-
-export { NavLink };
-```
-
----
-
-## 📁 FILE 4: nexus-logo.svg
-
-**Path:** `src/assets/nexus-logo.svg`
-
-Copy the SVG file directly from the source project.
-
----
-
-## 🎨 CSS TO ADD
-
-**Add to your global CSS file (e.g., `src/index.css`):**
+## 🎭 Required CSS (Add to your global CSS)
 
 ```css
-/* Glow animation for the center menu button */
+/* Glow pulse animation for menu button */
+.glow-pulse {
+  animation: glow-pulse 2s ease-in-out infinite;
+}
+
 @keyframes glow-pulse {
   0%, 100% {
     filter: brightness(1);
   }
   50% {
-    filter: brightness(1.2);
+    filter: brightness(1.1);
   }
 }
 
-.glow-pulse {
-  animation: glow-pulse 2s ease-in-out infinite;
+/* Tailwind animate-in classes (if not using tailwindcss-animate) */
+.animate-in {
+  animation-duration: 200ms;
+  animation-fill-mode: both;
+}
+
+.fade-in {
+  animation-name: fadeIn;
+}
+
+.slide-in-from-bottom-4 {
+  animation-name: slideInFromBottom;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideInFromBottom {
+  from { transform: translate(-50%, 1rem); }
+  to { transform: translate(-50%, 0); }
 }
 ```
 
 ---
 
-## 🔌 THEME STORE INTEGRATION
-
-### How Theme Colors Work
-
-The navbar reads colors from **CSS variables** injected into `document.documentElement` (the `:root`). This decouples the navbar from your theme store - it simply reads whatever CSS variables are present.
-
-**Pattern:**
-```
-[Theme Store] --useEffect--> [CSS Variables on :root] <--getComputedStyle-- [MobileNavBar]
-```
-
-### Required CSS Variables (HSL format without `hsl()` wrapper)
-
-| Variable | Purpose | Example Value |
-|----------|---------|---------------|
-| `--colors-buttons-list` | Inactive icon/text color | `0 0% 60%` (gray) |
-| `--colors-buttons-active` | Active icon/text + glow color | `25 95% 53%` (orange) |
-| `--colors-background-main` | Navbar background | `0 0% 8%` (dark) |
-| `--colors-type-text` | Menu popup text | `0 0% 95%` (white) |
-
-### How the Navbar Reads Colors
-
-```typescript
-// Inside MobileNavBar.tsx
-const getComputedColor = (varName: string, fallback: string) => {
-  if (typeof window === "undefined") return fallback;
-  const value = getComputedStyle(document.documentElement)
-    .getPropertyValue(varName)
-    .trim();
-  return value || fallback;
-};
-
-// Usage - wraps the HSL values in hsl() function
-const inactiveHsl = getComputedColor("--colors-buttons-list", "0 0% 60%");
-const activeHsl = getComputedColor("--colors-buttons-active", "25 95% 53%");
-
-const inactiveColor = `hsl(${inactiveHsl})`; // → "hsl(0 0% 60%)"
-const activeColor = `hsl(${activeHsl})`;     // → "hsl(25 95% 53%)"
-```
-
-### Inject Variables from Your Theme Store
-
-**Add this to your theme store/provider (e.g., `useThemeStore.ts` or `ThemeProvider.tsx`):**
-
-```typescript
-// In your theme store useEffect or subscription
-useEffect(() => {
-  const theme = currentTheme; // Your active theme object
-  const root = document.documentElement;
-  
-  // Inject navbar-required CSS variables (HSL values only, no hsl() wrapper)
-  root.style.setProperty("--colors-buttons-list", theme.buttons?.list || "0 0% 60%");
-  root.style.setProperty("--colors-buttons-active", theme.buttons?.active || "25 95% 53%");
-  root.style.setProperty("--colors-background-main", theme.background?.main || "0 0% 8%");
-  root.style.setProperty("--colors-type-text", theme.type?.text || "0 0% 95%");
-}, [currentTheme]);
-```
-
-### Example Theme Object Structure
-
-```typescript
-// Your theme object should have this shape:
-interface Theme {
-  buttons?: {
-    list?: string;   // "0 0% 60%" - inactive gray
-    active?: string; // "25 95% 53%" - theme primary color
-  };
-  background?: {
-    main?: string;   // "0 0% 8%" - dark background
-  };
-  type?: {
-    text?: string;   // "0 0% 95%" - light text
-  };
-}
-
-// Example themes:
-const orangeTheme = {
-  buttons: { list: "0 0% 60%", active: "25 95% 53%" },
-  background: { main: "0 0% 8%" },
-  type: { text: "0 0% 95%" }
-};
-
-const blueTheme = {
-  buttons: { list: "0 0% 60%", active: "210 100% 50%" },
-  background: { main: "220 20% 10%" },
-  type: { text: "0 0% 95%" }
-};
-```
-
-### Why This Pattern?
-
-1. **No prop drilling** - Navbar doesn't need theme context passed down
-2. **Instant updates** - CSS variables update the UI immediately
-3. **Framework agnostic** - Works with Zustand, Redux, Context, or any state manager
-4. **Fallback safe** - Navbar works with default colors if variables aren't set
-
----
-
-## 📍 LAYOUT USAGE
-
-**Add MobileNavBar to your layout or pages:**
+## 🔧 Usage in Your App
 
 ```tsx
 import MobileNavBar from "@/components/MobileNavBar";
 
-const Layout = ({ children }) => {
-  const location = useLocation();
-  
-  // Hide navbar on these routes
-  const hideNavRoutes = ["/settings", "/onboarding", "/login"];
-  const showNav = !hideNavRoutes.some(r => location.pathname.startsWith(r));
-  
+const App = () => {
   return (
-    <div className="min-h-screen pb-24">
-      {children}
-      {showNav && <MobileNavBar />}
+    <div className="min-h-screen pb-24"> {/* pb-24 for navbar space */}
+      {/* Your page content */}
+      <MobileNavBar />
     </div>
   );
 };
@@ -446,40 +395,61 @@ const Layout = ({ children }) => {
 
 ---
 
-## ✅ INTEGRATION CHECKLIST
+## 📐 Layout Specifications (DO NOT MODIFY)
 
-- [ ] Create `src/components/MobileNavBar.tsx` with code from FILE 1
-- [ ] Create `src/components/MenuPopup.tsx` with code from FILE 2
-- [ ] Create `src/components/NavLink.tsx` with code from FILE 3
-- [ ] Copy `nexus-logo.svg` to `src/assets/`
-- [ ] Add `.glow-pulse` CSS animation to global styles
-- [ ] Add CSS variable injection to theme store
-- [ ] Add `<MobileNavBar />` to layout with route-based hiding
-- [ ] Update MenuPopup paths to match your actual routes
-- [ ] Add `pb-24` padding to page containers for navbar space
-
----
-
-## 🧪 TESTING
-
-1. **Theme switching**: Change themes → navbar colors should update
-2. **Navigation**: Tap nav buttons → active state changes color
-3. **Menu popup**: Tap center button → popup slides up
-4. **Route hiding**: Go to `/settings` → navbar hides
+| Element | Size | Notes |
+|---------|------|-------|
+| Nav icons | `h-7 w-7` (28px) | Home, Search, Recent, Profile |
+| Menu logo | `h-9 w-9` (36px) | Center button icon |
+| Menu button circle | `w-[72px] h-[72px]` | Floating circle |
+| Menu button position | `-top-9` | Half inside, half outside navbar |
+| Menu label position | `bottom-4` | Aligned with other labels |
+| Center spacer | `w-20` | Space for floating button |
+| Navbar padding | `py-4` | Vertical padding |
+| Icon distribution | `justify-evenly` | Edge-to-edge layout |
+| Active stroke width | `2.5` | Thicker when active |
+| Inactive stroke width | `1.5` | Default stroke |
 
 ---
 
-## 📦 DEPENDENCIES
+## 🎨 Theme Color Flow
 
-Ensure these are installed:
-- `react-router-dom`
-- `lucide-react`
-
----
-
-## 🎯 NAVBAR SHAPE SPEC
-
-The navbar uses a custom border-radius (flat top, rounded bottom):
-```css
-border-radius: 12px 12px 32px 32px;
 ```
+┌─────────────────┐     useEffect      ┌──────────────────────┐
+│   Theme Store   │ ──────────────────▶│  CSS Variables on    │
+│  (currentTheme) │                    │  document.documentElement │
+└─────────────────┘                    └──────────────────────┘
+                                                  │
+                                                  │ getComputedStyle
+                                                  ▼
+                                       ┌──────────────────────┐
+                                       │    MobileNavBar      │
+                                       │    (reads colors)    │
+                                       └──────────────────────┘
+```
+
+---
+
+## ✅ Checklist for Integration
+
+- [ ] Copy `MobileNavBar.tsx` to `src/components/`
+- [ ] Copy `MenuPopup.tsx` to `src/components/`
+- [ ] Copy `nexus-logo.svg` to `src/assets/`
+- [ ] Add CSS variables injection to your theme store
+- [ ] Dispatch `theme-change` event when theme changes
+- [ ] Add `pb-24` padding to your page containers
+- [ ] Add glow-pulse animation to your global CSS
+- [ ] **DO NOT MODIFY** any dimension values
+
+---
+
+## 🚫 What NOT to Change
+
+1. **Icon sizes** - `h-7 w-7` for nav icons, `h-9 w-9` for menu logo
+2. **Menu button size** - `w-[72px] h-[72px]`
+3. **Positioning** - `-top-9`, `bottom-4`, `left-1/2`
+4. **Spacing** - `py-4`, `w-20`, `gap-1`, `gap-3`
+5. **Layout** - `justify-evenly`, `flex-col`
+6. **Z-index** - `z-50` for navbar, `z-40/z-50` for popup
+
+These values are optimized for mobile displays and edge-to-edge rendering.
