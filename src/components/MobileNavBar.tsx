@@ -1,6 +1,6 @@
 import { useLocation, useNavigate } from "react-router-dom";
 import { Home, Search, History, User } from "lucide-react";
-import logo from "@/assets/menu-logo.png";
+import nexusLogo from "@/assets/nexus-logo.svg";
 import { cn } from "@/lib/utils";
 
 interface NavItem {
@@ -40,19 +40,28 @@ const MobileNavBar = () => {
                 <button
                   key={item.id}
                   onClick={() => navigate(item.path)}
-                  className="relative flex flex-col items-center gap-1.5 active:scale-90 transition-transform duration-150"
+                  className="relative flex flex-col items-center gap-1 active:scale-90 transition-transform duration-150"
                 >
+                  {/* Fire glow effect at top */}
+                  {active && (
+                    <div 
+                      className="absolute -top-2 left-1/2 -translate-x-1/2 w-4 h-4 rounded-full"
+                      style={{
+                        background: `radial-gradient(circle, hsl(var(--nav-glow)) 0%, hsl(var(--nav-glow) / 0.5) 40%, transparent 70%)`,
+                        filter: `blur(2px)`,
+                      }}
+                    />
+                  )}
+                  
                   <Icon
                     className={cn(
                       "relative h-7 w-7 transition-all duration-300",
                       active
-                        ? "text-primary"
+                        ? "text-primary glow-orange"
                         : "text-[hsl(var(--nav-foreground))]"
                     )}
                     strokeWidth={active ? 2.5 : 1.5}
-                    style={active ? {
-                      filter: `drop-shadow(0 0 8px hsl(var(--nav-glow))) drop-shadow(0 0 16px hsl(var(--nav-glow) / 0.6))`,
-                    } : undefined}
+                    fill={active ? "hsl(var(--primary))" : "none"}
                   />
                   
                   <span
@@ -65,6 +74,16 @@ const MobileNavBar = () => {
                   >
                     {item.label}
                   </span>
+
+                  {/* Dot glow indicator below text */}
+                  {active && (
+                    <div 
+                      className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-primary"
+                      style={{
+                        boxShadow: `0 0 6px 2px hsl(var(--nav-glow)), 0 0 10px 4px hsl(var(--nav-glow) / 0.5)`,
+                      }}
+                    />
+                  )}
                 </button>
               );
             })}
@@ -81,19 +100,28 @@ const MobileNavBar = () => {
                 <button
                   key={item.id}
                   onClick={() => navigate(item.path)}
-                  className="relative flex flex-col items-center gap-1.5 active:scale-90 transition-transform duration-150"
+                  className="relative flex flex-col items-center gap-1 active:scale-90 transition-transform duration-150"
                 >
+                  {/* Fire glow effect at top */}
+                  {active && (
+                    <div 
+                      className="absolute -top-2 left-1/2 -translate-x-1/2 w-4 h-4 rounded-full"
+                      style={{
+                        background: `radial-gradient(circle, hsl(var(--nav-glow)) 0%, hsl(var(--nav-glow) / 0.5) 40%, transparent 70%)`,
+                        filter: `blur(2px)`,
+                      }}
+                    />
+                  )}
+                  
                   <Icon
                     className={cn(
                       "relative h-7 w-7 transition-all duration-300",
                       active
-                        ? "text-primary"
+                        ? "text-primary glow-orange"
                         : "text-[hsl(var(--nav-foreground))]"
                     )}
                     strokeWidth={active ? 2.5 : 1.5}
-                    style={active ? {
-                      filter: `drop-shadow(0 0 8px hsl(var(--nav-glow))) drop-shadow(0 0 16px hsl(var(--nav-glow) / 0.6))`,
-                    } : undefined}
+                    fill={active ? "hsl(var(--primary))" : "none"}
                   />
                   
                   <span
@@ -106,6 +134,16 @@ const MobileNavBar = () => {
                   >
                     {item.label}
                   </span>
+
+                  {/* Dot glow indicator below text */}
+                  {active && (
+                    <div 
+                      className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-primary"
+                      style={{
+                        boxShadow: `0 0 6px 2px hsl(var(--nav-glow)), 0 0 10px 4px hsl(var(--nav-glow) / 0.5)`,
+                      }}
+                    />
+                  )}
                 </button>
               );
             })}
@@ -114,39 +152,36 @@ const MobileNavBar = () => {
           {/* Center Menu button - floating above the bar */}
           <button
             onClick={() => navigate("/menu")}
-            className="absolute left-1/2 -translate-x-1/2 bottom-6 flex flex-col items-center active:scale-95 transition-transform duration-150"
+            className="absolute left-1/2 -translate-x-1/2 bottom-3 flex flex-col items-center active:scale-95 transition-transform duration-150"
           >
-            {/* Orange glow behind - single glow */}
+            {/* Glow behind logo */}
             <div
               className="absolute rounded-full glow-pulse"
               style={{
-                background: `radial-gradient(circle, hsl(var(--nav-glow) / 0.7) 0%, hsl(var(--nav-glow) / 0.3) 50%, transparent 70%)`,
-                width: "120px",
-                height: "120px",
-                top: "-20px",
+                background: `radial-gradient(circle, hsl(var(--nav-glow) / 0.6) 0%, hsl(var(--nav-glow) / 0.2) 50%, transparent 70%)`,
+                width: "60px",
+                height: "60px",
+                top: "50%",
                 left: "50%",
-                transform: "translateX(-50%)",
+                transform: "translate(-50%, -50%)",
               }}
             />
             
-            {/* Logo circle */}
-            <div
-              className="relative flex h-[80px] w-[80px] items-center justify-center rounded-full border-[3px] border-primary overflow-hidden p-[20%]"
-              style={{
-                background: "linear-gradient(180deg, hsl(0 0% 12%) 0%, hsl(0 0% 5%) 100%)",
-                boxShadow: `0 0 25px hsl(var(--nav-glow) / 0.5)`,
-              }}
-            >
-              <img
-                src={logo}
+            {/* Logo - same size as other icons */}
+            <div className="relative flex items-center justify-center h-7 w-7">
+              <img 
+                src={nexusLogo}
                 alt="Menu"
-                className="h-full w-full object-contain"
+                className="h-7 w-7"
+                style={{
+                  filter: `drop-shadow(0 0 8px hsl(var(--nav-glow))) drop-shadow(0 0 16px hsl(var(--nav-glow) / 0.6))`,
+                }}
               />
             </div>
             
             <span
               className={cn(
-                "mt-1 text-sm font-medium transition-colors duration-300",
+                "text-sm font-medium transition-colors duration-300 mt-1",
                 isMenuActive
                   ? "text-primary"
                   : "text-[hsl(var(--nav-foreground))]"
@@ -154,6 +189,16 @@ const MobileNavBar = () => {
             >
               Menu
             </span>
+
+            {/* Dot glow indicator below text */}
+            {isMenuActive && (
+              <div 
+                className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-primary"
+                style={{
+                  boxShadow: `0 0 6px 2px hsl(var(--nav-glow)), 0 0 10px 4px hsl(var(--nav-glow) / 0.5)`,
+                }}
+              />
+            )}
           </button>
         </div>
       </div>
