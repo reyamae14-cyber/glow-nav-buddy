@@ -1,4 +1,3 @@
-import { Film, Tv, Sparkles, Compass, Heart, Settings } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 interface MenuPopupProps {
@@ -18,12 +17,12 @@ const menuItems = [
 /**
  * MenuPopup Component for p-stream
  * 
- * A floating menu that appears when the center navbar button is clicked.
- * Uses p-stream's CSS variables for theming.
- * 
- * Required CSS variables:
- * - --colors-background-main: Dark background for the popup
- * - --colors-type-text: Text color
+ * A floating menu with smooth animations.
+ * Features:
+ * - Backdrop fade-in
+ * - Menu scale + slide animation
+ * - Staggered button animations
+ * - Hover glow effects on buttons
  */
 const MenuPopup = ({ isOpen, onClose }: MenuPopupProps) => {
   const navigate = useNavigate();
@@ -37,20 +36,36 @@ const MenuPopup = ({ isOpen, onClose }: MenuPopupProps) => {
 
   return (
     <>
-      {/* Backdrop - z-[60] to be above navbar (z-50) */}
+      {/* Backdrop with fade animation */}
       <div 
-        className="fixed inset-0 bg-black/60 z-[60]"
+        className="fixed inset-0 z-[60] backdrop-blur-sm"
+        style={{
+          background: 'rgba(0, 0, 0, 0.7)',
+          animation: 'fadeIn 0.3s ease-out forwards',
+        }}
         onClick={onClose}
       />
       
-      {/* Menu Box - z-[70] to be above backdrop and navbar */}
-      <div className="fixed bottom-28 left-1/2 -translate-x-1/2 z-[70] w-[280px] animate-in fade-in slide-in-from-bottom-4 duration-200">
+      {/* Menu Box with scale + slide animation */}
+      <div 
+        className="fixed bottom-28 left-1/2 z-[70] w-[280px]"
+        style={{
+          animation: 'menuSlideIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards',
+        }}
+      >
         <div 
-          className="rounded-2xl p-4 shadow-xl border border-white/10"
-          style={{ background: `hsl(var(--colors-background-main, 0 0% 8%))` }}
+          className="rounded-2xl p-4 shadow-2xl border border-white/10"
+          style={{ 
+            background: `hsl(var(--colors-background-main, 0 0% 8%))`,
+            boxShadow: `0 25px 50px -12px rgba(0, 0, 0, 0.5), 
+                        0 0 30px hsl(var(--colors-buttons-active, 25 95% 53%) / 0.15)`,
+          }}
         >
-          {/* Header */}
-          <div className="flex items-center gap-2 mb-4 px-1">
+          {/* Header with slide animation */}
+          <div 
+            className="flex items-center gap-2 mb-4 px-1"
+            style={{ animation: 'itemFadeIn 0.3s ease-out 0.1s forwards', opacity: 0 }}
+          >
             <div 
               className="w-1 h-5 rounded-full"
               style={{ background: `hsl(var(--colors-buttons-active, 25 95% 53%))` }}
@@ -63,17 +78,33 @@ const MenuPopup = ({ isOpen, onClose }: MenuPopupProps) => {
             </h3>
           </div>
           
-          {/* Menu Grid */}
+          {/* Menu Grid with staggered animations */}
           <div className="grid grid-cols-2 gap-3">
-            {menuItems.map((item) => (
+            {menuItems.map((item, index) => (
               <button
                 key={item.id}
                 onClick={() => handleNavigate(item.path)}
-                className="flex items-center gap-3 px-4 py-3 rounded-xl bg-white/5 hover:bg-white/10 transition-colors duration-200 active:scale-95"
+                className="group flex items-center gap-3 px-4 py-3 rounded-xl bg-white/5 
+                           hover:bg-white/15 transition-all duration-300 
+                           hover:scale-[1.02] active:scale-95
+                           hover:shadow-lg"
+                style={{
+                  animation: `itemFadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) ${0.15 + index * 0.05}s forwards`,
+                  opacity: 0,
+                  boxShadow: 'none',
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.boxShadow = `0 0 20px hsl(var(--colors-buttons-active, 25 95% 53%) / 0.2)`;
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.boxShadow = 'none';
+                }}
               >
-                <span className="text-xl">{item.emoji}</span>
+                <span className="text-xl transition-transform duration-300 group-hover:scale-110">
+                  {item.emoji}
+                </span>
                 <span 
-                  className="text-sm font-medium"
+                  className="text-sm font-medium transition-colors duration-300"
                   style={{ color: `hsl(var(--colors-type-text, 0 0% 95%))` }}
                 >
                   {item.label}
@@ -83,6 +114,36 @@ const MenuPopup = ({ isOpen, onClose }: MenuPopupProps) => {
           </div>
         </div>
       </div>
+
+      {/* Inline keyframe styles */}
+      <style>{`
+        @keyframes fadeIn {
+          from { opacity: 0; }
+          to { opacity: 1; }
+        }
+        
+        @keyframes menuSlideIn {
+          from { 
+            opacity: 0;
+            transform: translateX(-50%) translateY(20px) scale(0.95);
+          }
+          to { 
+            opacity: 1;
+            transform: translateX(-50%) translateY(0) scale(1);
+          }
+        }
+        
+        @keyframes itemFadeIn {
+          from { 
+            opacity: 0;
+            transform: translateY(10px);
+          }
+          to { 
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+      `}</style>
     </>
   );
 };
