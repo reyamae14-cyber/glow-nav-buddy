@@ -4,6 +4,7 @@ import { Home, Search, History, User } from "lucide-react";
 import nexusLogo from "@/assets/nexus-logo.svg";
 import { cn } from "@/lib/utils";
 import MenuPopup from "./MenuPopup";
+import SpinningRing from "./SpinningRing";
 import { useTheme } from "@/contexts/ThemeContext";
 
 interface NavItem {
@@ -131,19 +132,23 @@ const MobileNavBar = () => {
             })}
           </div>
 
-          {/* Center Menu button */}
+          {/* Center Menu button with spinning ring */}
           <button
             onClick={() => setIsMenuOpen(true)}
             className="absolute left-1/2 -translate-x-1/2 bottom-4 flex flex-col items-center active:scale-95 transition-transform duration-150"
           >
-            <div
-              className="relative flex items-center justify-center w-14 h-14 rounded-full glow-pulse -mt-10"
-              style={{
-                background: `hsl(var(--nav-background))`,
-                boxShadow: `0 0 15px 3px hsl(${menuGlowColor}), 0 0 30px 8px hsl(${menuGlowColor} / 0.5), 0 0 45px 12px hsl(${menuGlowColor} / 0.3)`,
-              }}
-            >
-              <img src={nexusLogo} alt="Menu" className="h-7 w-7" />
+            <div className="-mt-12">
+              <SpinningRing size={56}>
+                <div
+                  className="flex items-center justify-center w-14 h-14 rounded-full"
+                  style={{
+                    background: `hsl(var(--nav-background))`,
+                    boxShadow: `0 0 15px 3px hsl(${menuGlowColor}), 0 0 30px 8px hsl(${menuGlowColor} / 0.5), 0 0 45px 12px hsl(${menuGlowColor} / 0.3)`,
+                  }}
+                >
+                  <img src={nexusLogo} alt="Menu" className="h-7 w-7" />
+                </div>
+              </SpinningRing>
             </div>
 
             <span
