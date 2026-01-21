@@ -124,10 +124,10 @@ const MobileNavBar = () => {
             })}
           </div>
 
-          {/* Center Menu button - floating circle */}
+          {/* Center Menu button - floating circle (z-[80] to stay above popup) */}
           <button
-            onClick={() => setIsMenuOpen(true)}
-            className="absolute left-1/2 -translate-x-1/2 -top-9 flex items-center justify-center active:scale-95 transition-transform duration-150"
+            onClick={() => setIsMenuOpen(!isMenuOpen)}
+            className="absolute left-1/2 -translate-x-1/2 -top-9 z-[80] flex items-center justify-center active:scale-95 transition-transform duration-150"
           >
             <div
               className="relative flex items-center justify-center w-[72px] h-[72px] rounded-full glow-pulse"
