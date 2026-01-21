@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
 interface MenuPopupProps {
@@ -17,22 +18,50 @@ const menuItems = [
 /**
  * MenuPopup Component for p-stream
  * 
- * A floating menu with smooth animations.
+ * A floating menu with smooth open/close animations.
  * Features:
- * - Backdrop fade-in
- * - Menu scale + slide animation
+ * - Backdrop fade-in/out with blur
+ * - Menu scale + slide animation (in & out)
  * - Staggered button animations
  * - Hover glow effects on buttons
  */
 const MenuPopup = ({ isOpen, onClose }: MenuPopupProps) => {
   const navigate = useNavigate();
-  
-  if (!isOpen) return null;
+  const [isVisible, setIsVisible] = useState(false);
+  const [isClosing, setIsClosing] = useState(false);
+
+  // Handle open/close with animations
+  useEffect(() => {
+    if (isOpen) {
+      setIsVisible(true);
+      setIsClosing(false);
+    } else if (isVisible) {
+      // Trigger close animation
+      setIsClosing(true);
+      const timer = setTimeout(() => {
+        setIsVisible(false);
+        setIsClosing(false);
+      }, 300); // Match animation duration
+      return () => clearTimeout(timer);
+    }
+  }, [isOpen, isVisible]);
+
+  const handleClose = () => {
+    setIsClosing(true);
+    setTimeout(() => {
+      onClose();
+    }, 250); // Slightly less than animation to feel snappy
+  };
 
   const handleNavigate = (path: string) => {
-    navigate(path);
-    onClose();
+    setIsClosing(true);
+    setTimeout(() => {
+      navigate(path);
+      onClose();
+    }, 200);
   };
+
+  if (!isVisible) return null;
 
   return (
     <>
@@ -41,16 +70,20 @@ const MenuPopup = ({ isOpen, onClose }: MenuPopupProps) => {
         className="fixed inset-0 z-[60] backdrop-blur-sm"
         style={{
           background: 'rgba(0, 0, 0, 0.7)',
-          animation: 'fadeIn 0.3s ease-out forwards',
+          animation: isClosing 
+            ? 'fadeOut 0.3s ease-out forwards' 
+            : 'fadeIn 0.3s ease-out forwards',
         }}
-        onClick={onClose}
+        onClick={handleClose}
       />
       
       {/* Menu Box with scale + slide animation */}
       <div 
         className="fixed bottom-28 left-1/2 z-[70] w-[280px]"
         style={{
-          animation: 'menuSlideIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards',
+          animation: isClosing 
+            ? 'menuSlideOut 0.3s cubic-bezier(0.4, 0, 1, 1) forwards'
+            : 'menuSlideIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards',
         }}
       >
         <div 
@@ -64,7 +97,12 @@ const MenuPopup = ({ isOpen, onClose }: MenuPopupProps) => {
           {/* Header with slide animation */}
           <div 
             className="flex items-center gap-2 mb-4 px-1"
-            style={{ animation: 'itemFadeIn 0.3s ease-out 0.1s forwards', opacity: 0 }}
+            style={{ 
+              animation: isClosing 
+                ? 'itemFadeOut 0.2s ease-out forwards' 
+                : 'itemFadeIn 0.3s ease-out 0.1s forwards', 
+              opacity: isClosing ? 1 : 0 
+            }}
           >
             <div 
               className="w-1 h-5 rounded-full"
@@ -89,8 +127,10 @@ const MenuPopup = ({ isOpen, onClose }: MenuPopupProps) => {
                            hover:scale-[1.02] active:scale-95
                            hover:shadow-lg"
                 style={{
-                  animation: `itemFadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) ${0.15 + index * 0.05}s forwards`,
-                  opacity: 0,
+                  animation: isClosing 
+                    ? `itemFadeOut 0.2s ease-out ${(5 - index) * 0.03}s forwards`
+                    : `itemFadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) ${0.15 + index * 0.05}s forwards`,
+                  opacity: isClosing ? 1 : 0,
                   boxShadow: 'none',
                 }}
                 onMouseEnter={(e) => {
@@ -122,6 +162,11 @@ const MenuPopup = ({ isOpen, onClose }: MenuPopupProps) => {
           to { opacity: 1; }
         }
         
+        @keyframes fadeOut {
+          from { opacity: 1; }
+          to { opacity: 0; }
+        }
+        
         @keyframes menuSlideIn {
           from { 
             opacity: 0;
@@ -133,6 +178,17 @@ const MenuPopup = ({ isOpen, onClose }: MenuPopupProps) => {
           }
         }
         
+        @keyframes menuSlideOut {
+          from { 
+            opacity: 1;
+            transform: translateX(-50%) translateY(0) scale(1);
+          }
+          to { 
+            opacity: 0;
+            transform: translateX(-50%) translateY(20px) scale(0.95);
+          }
+        }
+        
         @keyframes itemFadeIn {
           from { 
             opacity: 0;
@@ -141,6 +197,17 @@ const MenuPopup = ({ isOpen, onClose }: MenuPopupProps) => {
           to { 
             opacity: 1;
             transform: translateY(0);
+          }
+        }
+        
+        @keyframes itemFadeOut {
+          from { 
+            opacity: 1;
+            transform: translateY(0);
+          }
+          to { 
+            opacity: 0;
+            transform: translateY(-5px);
           }
         }
       `}</style>
