@@ -1,10 +1,12 @@
 import MobileNavBar from "@/components/MobileNavBar";
+import ThemeTester from "@/components/ThemeTester";
 
 const Index = () => {
   return (
     <div className="min-h-screen bg-background pb-24">
-      <div className="container mx-auto px-4 pt-8">
-        <h1 className="text-2xl font-bold text-foreground">Home</h1>
+      <div className="container mx-auto px-4 pt-4">
+        <ThemeTester />
+        <h1 className="mt-4 text-2xl font-bold text-foreground">Home</h1>
         <p className="mt-2 text-muted-foreground">Welcome to your app!</p>
         
         <div className="mt-8 grid gap-4">
