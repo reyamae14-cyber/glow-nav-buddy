@@ -46,11 +46,10 @@ const MobileNavBar = () => {
                     className={cn(
                       "relative h-7 w-7 transition-all duration-300",
                       active
-                        ? "text-primary fill-primary"
+                        ? "text-primary"
                         : "text-[hsl(var(--nav-foreground))]"
                     )}
-                    strokeWidth={active ? 2 : 1.5}
-                    fill={active ? "currentColor" : "none"}
+                    strokeWidth={active ? 2.5 : 1.5}
                     style={active ? {
                       filter: `drop-shadow(0 0 8px hsl(var(--nav-glow))) drop-shadow(0 0 16px hsl(var(--nav-glow) / 0.6))`,
                     } : undefined}
@@ -88,11 +87,10 @@ const MobileNavBar = () => {
                     className={cn(
                       "relative h-7 w-7 transition-all duration-300",
                       active
-                        ? "text-primary fill-primary"
+                        ? "text-primary"
                         : "text-[hsl(var(--nav-foreground))]"
                     )}
-                    strokeWidth={active ? 2 : 1.5}
-                    fill={active ? "currentColor" : "none"}
+                    strokeWidth={active ? 2.5 : 1.5}
                     style={active ? {
                       filter: `drop-shadow(0 0 8px hsl(var(--nav-glow))) drop-shadow(0 0 16px hsl(var(--nav-glow) / 0.6))`,
                     } : undefined}
