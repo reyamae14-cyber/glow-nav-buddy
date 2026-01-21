@@ -1,5 +1,5 @@
 import { Film, Tv, Sparkles, Compass, Heart, Settings } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { useNavigate } from "react-router-dom";
 
 interface MenuPopupProps {
   isOpen: boolean;
@@ -7,16 +7,33 @@ interface MenuPopupProps {
 }
 
 const menuItems = [
-  { id: "movies", label: "Movies", icon: Film, emoji: "🎬" },
-  { id: "tvshows", label: "TV Shows", icon: Tv, emoji: "📺" },
-  { id: "anime", label: "Anime", icon: Sparkles, emoji: "✨" },
-  { id: "discover", label: "Discover", icon: Compass, emoji: "🧭" },
-  { id: "favorites", label: "Favorites", icon: Heart, emoji: "❤️" },
-  { id: "settings", label: "Settings", icon: Settings, emoji: "⚙️" },
+  { id: "movies", label: "Movies", path: "/movies", emoji: "🎬" },
+  { id: "tvshows", label: "TV Shows", path: "/tv", emoji: "📺" },
+  { id: "anime", label: "Anime", path: "/anime", emoji: "✨" },
+  { id: "discover", label: "Discover", path: "/discover", emoji: "🧭" },
+  { id: "favorites", label: "Favorites", path: "/favorites", emoji: "❤️" },
+  { id: "settings", label: "Settings", path: "/settings", emoji: "⚙️" },
 ];
 
+/**
+ * MenuPopup Component for p-stream
+ * 
+ * A floating menu that appears when the center navbar button is clicked.
+ * Uses p-stream's CSS variables for theming.
+ * 
+ * Required CSS variables:
+ * - --colors-background-main: Dark background for the popup
+ * - --colors-type-text: Text color
+ */
 const MenuPopup = ({ isOpen, onClose }: MenuPopupProps) => {
+  const navigate = useNavigate();
+  
   if (!isOpen) return null;
+
+  const handleNavigate = (path: string) => {
+    navigate(path);
+    onClose();
+  };
 
   return (
     <>
@@ -29,13 +46,21 @@ const MenuPopup = ({ isOpen, onClose }: MenuPopupProps) => {
       {/* Menu Box */}
       <div className="fixed bottom-28 left-1/2 -translate-x-1/2 z-50 w-[280px] animate-in fade-in slide-in-from-bottom-4 duration-200">
         <div 
-          className="rounded-2xl p-4 shadow-xl border border-border/20"
-          style={{ background: `hsl(var(--nav-background))` }}
+          className="rounded-2xl p-4 shadow-xl border border-white/10"
+          style={{ background: `hsl(var(--colors-background-main, 0 0% 8%))` }}
         >
           {/* Header */}
           <div className="flex items-center gap-2 mb-4 px-1">
-            <div className="w-1 h-5 bg-primary rounded-full" />
-            <h3 className="text-lg font-semibold text-[hsl(var(--nav-foreground))]">Browse Nexus</h3>
+            <div 
+              className="w-1 h-5 rounded-full"
+              style={{ background: `hsl(var(--colors-buttons-active, 25 95% 53%))` }}
+            />
+            <h3 
+              className="text-lg font-semibold"
+              style={{ color: `hsl(var(--colors-type-text, 0 0% 95%))` }}
+            >
+              Browse
+            </h3>
           </div>
           
           {/* Menu Grid */}
@@ -43,17 +68,16 @@ const MenuPopup = ({ isOpen, onClose }: MenuPopupProps) => {
             {menuItems.map((item) => (
               <button
                 key={item.id}
-                onClick={() => {
-                  onClose();
-                }}
-                className={cn(
-                  "flex items-center gap-3 px-4 py-3 rounded-xl",
-                  "bg-background/10 hover:bg-background/20 transition-colors duration-200",
-                  "active:scale-95 transition-transform"
-                )}
+                onClick={() => handleNavigate(item.path)}
+                className="flex items-center gap-3 px-4 py-3 rounded-xl bg-white/5 hover:bg-white/10 transition-colors duration-200 active:scale-95"
               >
                 <span className="text-xl">{item.emoji}</span>
-                <span className="text-sm font-medium text-[hsl(var(--nav-foreground))]">{item.label}</span>
+                <span 
+                  className="text-sm font-medium"
+                  style={{ color: `hsl(var(--colors-type-text, 0 0% 95%))` }}
+                >
+                  {item.label}
+                </span>
               </button>
             ))}
           </div>
