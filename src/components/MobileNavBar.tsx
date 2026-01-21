@@ -61,7 +61,6 @@ const MobileNavBar = () => {
                         : "text-[hsl(var(--nav-foreground))]"
                     )}
                     strokeWidth={active ? 2.5 : 1.5}
-                    fill={active ? "hsl(var(--primary))" : "none"}
                   />
                   
                   <span
@@ -121,7 +120,6 @@ const MobileNavBar = () => {
                         : "text-[hsl(var(--nav-foreground))]"
                     )}
                     strokeWidth={active ? 2.5 : 1.5}
-                    fill={active ? "hsl(var(--primary))" : "none"}
                   />
                   
                   <span
@@ -152,36 +150,36 @@ const MobileNavBar = () => {
           {/* Center Menu button - floating above the bar */}
           <button
             onClick={() => navigate("/menu")}
-            className="absolute left-1/2 -translate-x-1/2 bottom-3 flex flex-col items-center active:scale-95 transition-transform duration-150"
+            className="absolute left-1/2 -translate-x-1/2 bottom-3 flex flex-col items-center gap-1 active:scale-95 transition-transform duration-150"
           >
-            {/* Glow behind logo */}
-            <div
-              className="absolute rounded-full glow-pulse"
-              style={{
-                background: `radial-gradient(circle, hsl(var(--nav-glow) / 0.6) 0%, hsl(var(--nav-glow) / 0.2) 50%, transparent 70%)`,
-                width: "60px",
-                height: "60px",
-                top: "50%",
-                left: "50%",
-                transform: "translate(-50%, -50%)",
-              }}
-            />
+            {/* Fire glow effect at top */}
+            {isMenuActive && (
+              <div 
+                className="absolute -top-2 left-1/2 -translate-x-1/2 w-4 h-4 rounded-full"
+                style={{
+                  background: `radial-gradient(circle, hsl(var(--nav-glow)) 0%, hsl(var(--nav-glow) / 0.5) 40%, transparent 70%)`,
+                  filter: `blur(2px)`,
+                }}
+              />
+            )}
             
-            {/* Logo - same size as other icons */}
-            <div className="relative flex items-center justify-center h-7 w-7">
+            {/* Logo with animated border ring */}
+            <div 
+              className="relative flex items-center justify-center h-7 w-7 rounded-full glow-pulse"
+              style={{
+                boxShadow: `0 0 0 2px hsl(var(--nav-glow)), 0 0 8px 2px hsl(var(--nav-glow) / 0.6)`,
+              }}
+            >
               <img 
                 src={nexusLogo}
                 alt="Menu"
-                className="h-7 w-7"
-                style={{
-                  filter: `drop-shadow(0 0 8px hsl(var(--nav-glow))) drop-shadow(0 0 16px hsl(var(--nav-glow) / 0.6))`,
-                }}
+                className="h-5 w-5"
               />
             </div>
             
             <span
               className={cn(
-                "text-sm font-medium transition-colors duration-300 mt-1",
+                "text-sm font-medium transition-colors duration-300",
                 isMenuActive
                   ? "text-primary"
                   : "text-[hsl(var(--nav-foreground))]"
