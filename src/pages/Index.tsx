@@ -1,26 +1,15 @@
-import { useState } from "react";
 import MobileNavBar from "@/components/MobileNavBar";
-import ThemeTester, { themes, ThemeColors } from "@/components/ThemeTester";
+import ThemeTester from "@/components/ThemeTester";
 
 const Index = () => {
-  const [currentTheme, setCurrentTheme] = useState<ThemeColors>(themes[0]);
-
-  const handleThemeChange = (theme: ThemeColors) => {
-    setCurrentTheme(theme);
-  };
-
   return (
     <div className="min-h-screen bg-background pb-24">
       <div className="container mx-auto px-4 pt-8">
         <h1 className="text-2xl font-bold text-foreground">Home</h1>
         <p className="mt-2 text-muted-foreground">Welcome to your app!</p>
         
-        {/* Theme Tester Section */}
         <div className="mt-6">
-          <ThemeTester 
-            currentTheme={currentTheme.name} 
-            onThemeChange={handleThemeChange} 
-          />
+          <ThemeTester />
         </div>
         
         <div className="mt-8 grid gap-4">
@@ -32,7 +21,7 @@ const Index = () => {
           </div>
         </div>
       </div>
-      <MobileNavBar theme={currentTheme} />
+      <MobileNavBar />
     </div>
   );
 };

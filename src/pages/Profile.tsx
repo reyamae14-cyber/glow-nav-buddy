@@ -1,4 +1,5 @@
 import MobileNavBar from "@/components/MobileNavBar";
+import ThemeTester from "@/components/ThemeTester";
 
 const Profile = () => {
   return (
@@ -6,6 +7,9 @@ const Profile = () => {
       <div className="container mx-auto px-4 pt-8">
         <h1 className="text-2xl font-bold text-foreground">Profile</h1>
         <p className="mt-2 text-muted-foreground">Manage your account</p>
+        <div className="mt-6">
+          <ThemeTester />
+        </div>
       </div>
       <MobileNavBar />
     </div>
