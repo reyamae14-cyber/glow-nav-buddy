@@ -28,11 +28,14 @@ const MenuPopup = ({ isOpen, onClose }: MenuPopupProps) => {
       
       {/* Menu Box */}
       <div className="fixed bottom-28 left-1/2 -translate-x-1/2 z-50 w-[280px] animate-in fade-in slide-in-from-bottom-4 duration-200">
-        <div className="bg-card rounded-2xl p-4 shadow-xl border border-border/50">
+        <div 
+          className="rounded-2xl p-4 shadow-xl border border-border/20"
+          style={{ background: `hsl(var(--nav-background))` }}
+        >
           {/* Header */}
           <div className="flex items-center gap-2 mb-4 px-1">
             <div className="w-1 h-5 bg-primary rounded-full" />
-            <h3 className="text-lg font-semibold text-foreground">Browse Nexus</h3>
+            <h3 className="text-lg font-semibold text-[hsl(var(--nav-foreground))]">Browse Nexus</h3>
           </div>
           
           {/* Menu Grid */}
@@ -41,17 +44,16 @@ const MenuPopup = ({ isOpen, onClose }: MenuPopupProps) => {
               <button
                 key={item.id}
                 onClick={() => {
-                  // Handle menu item click
                   onClose();
                 }}
                 className={cn(
                   "flex items-center gap-3 px-4 py-3 rounded-xl",
-                  "bg-muted/50 hover:bg-muted transition-colors duration-200",
+                  "bg-background/10 hover:bg-background/20 transition-colors duration-200",
                   "active:scale-95 transition-transform"
                 )}
               >
                 <span className="text-xl">{item.emoji}</span>
-                <span className="text-sm font-medium text-foreground">{item.label}</span>
+                <span className="text-sm font-medium text-[hsl(var(--nav-foreground))]">{item.label}</span>
               </button>
             ))}
           </div>
