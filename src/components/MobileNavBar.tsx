@@ -65,7 +65,7 @@ const MobileNavBar = () => {
         <div className="relative flex items-end justify-center">
           {/* Navbar edge-to-edge */}
           <div 
-            className="flex w-full items-center justify-around px-6 py-4"
+            className="flex w-full items-center justify-evenly py-4"
             style={{
               background: `hsl(var(--colors-background-main, 0 0% 8%))`,
             }}
