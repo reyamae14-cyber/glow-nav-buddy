@@ -147,14 +147,14 @@ const MobileNavBar = () => {
             })}
           </div>
 
-          {/* Center Menu button - floating half outside the bar */}
+          {/* Center Menu button - circle floats above, text aligns with others */}
           <button
             onClick={() => navigate("/menu")}
-            className="absolute left-1/2 -translate-x-1/2 -top-7 flex flex-col items-center gap-1 active:scale-95 transition-transform duration-150"
+            className="absolute left-1/2 -translate-x-1/2 bottom-4 flex flex-col items-center active:scale-95 transition-transform duration-150"
           >
-            {/* Black circle with orange glow */}
+            {/* Black circle with orange glow - positioned above */}
             <div 
-              className="relative flex items-center justify-center w-14 h-14 rounded-full glow-pulse"
+              className="relative flex items-center justify-center w-14 h-14 rounded-full glow-pulse -mt-10"
               style={{
                 background: `hsl(var(--nav-background))`,
                 boxShadow: `0 0 15px 3px hsl(var(--nav-glow)), 0 0 30px 8px hsl(var(--nav-glow) / 0.5), 0 0 45px 12px hsl(var(--nav-glow) / 0.3)`,
@@ -170,7 +170,7 @@ const MobileNavBar = () => {
             
             <span
               className={cn(
-                "text-sm font-medium transition-colors duration-300",
+                "text-sm font-medium transition-colors duration-300 mt-1",
                 isMenuActive
                   ? "text-primary"
                   : "text-[hsl(var(--nav-foreground))]"
