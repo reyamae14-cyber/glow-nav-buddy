@@ -152,28 +152,19 @@ const MobileNavBar = () => {
             onClick={() => navigate("/menu")}
             className="absolute left-1/2 -translate-x-1/2 bottom-3 flex flex-col items-center gap-1 active:scale-95 transition-transform duration-150"
           >
-            {/* Fire glow effect at top */}
-            {isMenuActive && (
-              <div 
-                className="absolute -top-2 left-1/2 -translate-x-1/2 w-4 h-4 rounded-full"
-                style={{
-                  background: `radial-gradient(circle, hsl(var(--nav-glow)) 0%, hsl(var(--nav-glow) / 0.5) 40%, transparent 70%)`,
-                  filter: `blur(2px)`,
-                }}
-              />
-            )}
-            
-            {/* Logo with animated border ring */}
+            {/* Black circle with orange glow */}
             <div 
-              className="relative flex items-center justify-center h-7 w-7 rounded-full glow-pulse"
+              className="relative flex items-center justify-center w-14 h-14 rounded-full glow-pulse"
               style={{
-                boxShadow: `0 0 0 2px hsl(var(--nav-glow)), 0 0 8px 2px hsl(var(--nav-glow) / 0.6)`,
+                background: `hsl(var(--nav-background))`,
+                boxShadow: `0 0 15px 3px hsl(var(--nav-glow)), 0 0 30px 8px hsl(var(--nav-glow) / 0.5), 0 0 45px 12px hsl(var(--nav-glow) / 0.3)`,
               }}
             >
+              {/* Logo centered inside */}
               <img 
                 src={nexusLogo}
                 alt="Menu"
-                className="h-5 w-5"
+                className="h-7 w-7"
               />
             </div>
             
