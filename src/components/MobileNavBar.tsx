@@ -137,13 +137,18 @@ const MobileNavBar = () => {
             className="absolute left-1/2 -translate-x-1/2 bottom-4 flex flex-col items-center active:scale-95 transition-transform duration-150"
           >
             <div
-              className="relative flex items-center justify-center w-14 h-14 rounded-full glow-pulse -mt-10"
+              className={`relative flex items-center justify-center w-14 h-14 rounded-full -mt-10 transition-all duration-300 ${
+                isMenuOpen || isMenuActive ? 'glow-pulse' : ''
+              }`}
               style={{
                 background: `hsl(var(--nav-background))`,
-                boxShadow: `0 0 15px 3px hsl(${menuGlowColor}), 0 0 30px 8px hsl(${menuGlowColor} / 0.5), 0 0 45px 12px hsl(${menuGlowColor} / 0.3)`,
+                border: `2.5px solid hsl(${menuGlowColor})`,
+                boxShadow: isMenuOpen || isMenuActive 
+                  ? `0 0 15px 3px hsl(${menuGlowColor}), 0 0 30px 8px hsl(${menuGlowColor} / 0.5), 0 0 45px 12px hsl(${menuGlowColor} / 0.3)`
+                  : 'none',
               }}
             >
-              <img src={nexusLogo} alt="Menu" className="h-7 w-7" />
+              <img src={nexusLogo} alt="Menu" className="h-8 w-8" />
             </div>
 
             <span
