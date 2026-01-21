@@ -325,32 +325,99 @@ Copy the SVG file directly from the source project.
 
 ## 🔌 THEME STORE INTEGRATION
 
-**Add this to your theme store/provider to inject CSS variables:**
+### How Theme Colors Work
+
+The navbar reads colors from **CSS variables** injected into `document.documentElement` (the `:root`). This decouples the navbar from your theme store - it simply reads whatever CSS variables are present.
+
+**Pattern:**
+```
+[Theme Store] --useEffect--> [CSS Variables on :root] <--getComputedStyle-- [MobileNavBar]
+```
+
+### Required CSS Variables (HSL format without `hsl()` wrapper)
+
+| Variable | Purpose | Example Value |
+|----------|---------|---------------|
+| `--colors-buttons-list` | Inactive icon/text color | `0 0% 60%` (gray) |
+| `--colors-buttons-active` | Active icon/text + glow color | `25 95% 53%` (orange) |
+| `--colors-background-main` | Navbar background | `0 0% 8%` (dark) |
+| `--colors-type-text` | Menu popup text | `0 0% 95%` (white) |
+
+### How the Navbar Reads Colors
+
+```typescript
+// Inside MobileNavBar.tsx
+const getComputedColor = (varName: string, fallback: string) => {
+  if (typeof window === "undefined") return fallback;
+  const value = getComputedStyle(document.documentElement)
+    .getPropertyValue(varName)
+    .trim();
+  return value || fallback;
+};
+
+// Usage - wraps the HSL values in hsl() function
+const inactiveHsl = getComputedColor("--colors-buttons-list", "0 0% 60%");
+const activeHsl = getComputedColor("--colors-buttons-active", "25 95% 53%");
+
+const inactiveColor = `hsl(${inactiveHsl})`; // → "hsl(0 0% 60%)"
+const activeColor = `hsl(${activeHsl})`;     // → "hsl(25 95% 53%)"
+```
+
+### Inject Variables from Your Theme Store
+
+**Add this to your theme store/provider (e.g., `useThemeStore.ts` or `ThemeProvider.tsx`):**
 
 ```typescript
 // In your theme store useEffect or subscription
 useEffect(() => {
   const theme = currentTheme; // Your active theme object
+  const root = document.documentElement;
   
-  // Inject navbar-required CSS variables
-  document.documentElement.style.setProperty(
-    "--colors-buttons-list", 
-    theme.buttons?.list || "0 0% 60%"
-  );
-  document.documentElement.style.setProperty(
-    "--colors-buttons-active", 
-    theme.buttons?.active || "25 95% 53%"
-  );
-  document.documentElement.style.setProperty(
-    "--colors-background-main", 
-    theme.background?.main || "0 0% 8%"
-  );
-  document.documentElement.style.setProperty(
-    "--colors-type-text", 
-    theme.type?.text || "0 0% 95%"
-  );
+  // Inject navbar-required CSS variables (HSL values only, no hsl() wrapper)
+  root.style.setProperty("--colors-buttons-list", theme.buttons?.list || "0 0% 60%");
+  root.style.setProperty("--colors-buttons-active", theme.buttons?.active || "25 95% 53%");
+  root.style.setProperty("--colors-background-main", theme.background?.main || "0 0% 8%");
+  root.style.setProperty("--colors-type-text", theme.type?.text || "0 0% 95%");
 }, [currentTheme]);
 ```
+
+### Example Theme Object Structure
+
+```typescript
+// Your theme object should have this shape:
+interface Theme {
+  buttons?: {
+    list?: string;   // "0 0% 60%" - inactive gray
+    active?: string; // "25 95% 53%" - theme primary color
+  };
+  background?: {
+    main?: string;   // "0 0% 8%" - dark background
+  };
+  type?: {
+    text?: string;   // "0 0% 95%" - light text
+  };
+}
+
+// Example themes:
+const orangeTheme = {
+  buttons: { list: "0 0% 60%", active: "25 95% 53%" },
+  background: { main: "0 0% 8%" },
+  type: { text: "0 0% 95%" }
+};
+
+const blueTheme = {
+  buttons: { list: "0 0% 60%", active: "210 100% 50%" },
+  background: { main: "220 20% 10%" },
+  type: { text: "0 0% 95%" }
+};
+```
+
+### Why This Pattern?
+
+1. **No prop drilling** - Navbar doesn't need theme context passed down
+2. **Instant updates** - CSS variables update the UI immediately
+3. **Framework agnostic** - Works with Zustand, Redux, Context, or any state manager
+4. **Fallback safe** - Navbar works with default colors if variables aren't set
 
 ---
 
