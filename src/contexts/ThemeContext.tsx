@@ -9,7 +9,8 @@ export interface ThemeColors {
   accent?: string;
 }
 
-// All 23 themes - some with dual colors (accent)
+// All themes - some with dual colors (accent)
+// Dual-color logic: buttons.list = inactive icon color, buttons.active = primary active color, accent = secondary active color
 export const themes: ThemeColors[] = [
   { name: "Harvest", buttons: { list: "0 0% 60%", active: "25 95% 53%" } },
   { name: "Ocean", buttons: { list: "200 15% 50%", active: "200 80% 55%" } },
@@ -34,6 +35,14 @@ export const themes: ThemeColors[] = [
   { name: "Sky", buttons: { list: "190 15% 50%", active: "195 85% 55%" }, accent: "210 80% 60%" },
   { name: "Peach", buttons: { list: "20 20% 55%", active: "25 80% 65%" }, accent: "350 70% 60%" },
   { name: "Slate", buttons: { list: "210 10% 50%", active: "210 40% 60%" } },
+  // p-stream matching themes
+  { name: "Spiderman", buttons: { list: "0 0% 60%", active: "0 80% 50%" }, accent: "220 80% 55%" }, // Red + Blue
+  { name: "Wolverine", buttons: { list: "0 0% 60%", active: "45 95% 50%" }, accent: "220 80% 55%" }, // Yellow + Blue
+  { name: "Hulk", buttons: { list: "0 0% 60%", active: "120 70% 45%" }, accent: "0 70% 50%" }, // Green + Red
+  { name: "Popsicle", buttons: { list: "0 0% 60%", active: "35 95% 55%" }, accent: "280 70% 55%" }, // Orange + Purple
+  { name: "Christmas", buttons: { list: "0 0% 60%", active: "120 70% 40%" }, accent: "0 80% 50%" }, // Green + Red
+  { name: "Cobalt", buttons: { list: "0 0% 60%", active: "220 80% 55%" } },
+  { name: "Grape", buttons: { list: "0 0% 60%", active: "280 70% 55%" } },
 ];
 
 interface ThemeContextType {
@@ -70,6 +79,9 @@ export const ThemeProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     document.documentElement.style.setProperty("--nav-glow", currentTheme.buttons.active);
     document.documentElement.style.setProperty("--primary", currentTheme.buttons.active);
+    document.documentElement.style.setProperty("--nav-inactive", currentTheme.buttons.list);
+    document.documentElement.style.setProperty("--nav-active", currentTheme.buttons.active);
+    document.documentElement.style.setProperty("--nav-accent", currentTheme.accent || currentTheme.buttons.active);
   }, [currentTheme]);
 
   return (
