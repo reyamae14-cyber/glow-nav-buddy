@@ -27,9 +27,7 @@ const MobileNavBar = () => {
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 px-4 pb-4">
       <div className="relative mx-auto max-w-md">
-        {/* Main nav bar container */}
         <div className="relative flex items-end justify-center">
-          {/* Dark rounded bar */}
           <div className="flex w-full items-center justify-around rounded-[2rem] bg-[hsl(var(--nav-background))] px-6 py-4">
             {/* Left side buttons */}
             {navItems.slice(0, 2).map((item) => {
@@ -69,16 +67,6 @@ const MobileNavBar = () => {
                   >
                     {item.label}
                   </span>
-
-                  {/* Dot glow indicator below text */}
-                  {active && (
-                    <div
-                      className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-primary"
-                      style={{
-                        boxShadow: `0 0 6px 2px hsl(var(--nav-glow)), 0 0 10px 4px hsl(var(--nav-glow) / 0.5)`,
-                      }}
-                    />
-                  )}
                 </button>
               );
             })}
@@ -124,27 +112,16 @@ const MobileNavBar = () => {
                   >
                     {item.label}
                   </span>
-
-                  {/* Dot glow indicator below text */}
-                  {active && (
-                    <div
-                      className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-primary"
-                      style={{
-                        boxShadow: `0 0 2px 2px hsl(var(--nav-glow)), 0 0 10px 4px hsl(var(--nav-glow) / 0.5)`,
-                      }}
-                    />
-                  )}
                 </button>
               );
             })}
           </div>
 
-          {/* Center Menu button - circle floats above, text aligns with others */}
+          {/* Center Menu button */}
           <button
             onClick={() => navigate("/menu")}
             className="absolute left-1/2 -translate-x-1/2 bottom-4 flex flex-col items-center active:scale-95 transition-transform duration-150"
           >
-            {/* Black circle with orange glow - positioned above */}
             <div
               className="relative flex items-center justify-center w-14 h-14 rounded-full glow-pulse -mt-10"
               style={{
@@ -152,7 +129,6 @@ const MobileNavBar = () => {
                 boxShadow: `0 0 15px 3px hsl(var(--nav-glow)), 0 0 30px 8px hsl(var(--nav-glow) / 0.5), 0 0 45px 12px hsl(var(--nav-glow) / 0.3)`,
               }}
             >
-              {/* Logo centered inside */}
               <img src={nexusLogo} alt="Menu" className="h-7 w-7" />
             </div>
 
@@ -164,16 +140,6 @@ const MobileNavBar = () => {
             >
               Menu
             </span>
-
-            {/* Dot glow indicator below text */}
-            {isMenuActive && (
-              <div
-                className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-primary"
-                style={{
-                  boxShadow: `0 0 6px 2px hsl(var(--nav-glow)), 0 0 10px 4px hsl(var(--nav-glow) / 0.5)`,
-                }}
-              />
-            )}
           </button>
         </div>
       </div>
