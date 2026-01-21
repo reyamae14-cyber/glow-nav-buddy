@@ -52,19 +52,29 @@ const MobileNavBar = () => {
   const isMenuActive = location.pathname === "/menu";
 
   // Get theme colors - dual color logic:
-  // Inactive icons = primary active color (e.g., red in Spiderman)
-  // Selected/active icon = accent color (e.g., blue in Spiderman), falls back to active if no accent
-  const primaryColor = `hsl(${currentTheme.buttons.active})`;
-  const selectedColor = currentTheme.accent ? `hsl(${currentTheme.accent})` : primaryColor;
-  const inactiveColor = `hsl(${currentTheme.buttons.list})`;
+  // For dual-color themes (with accent): inactive = active color (red), selected = accent (blue)
+  // For single-color themes: inactive = list color (gray), selected = active color
+  const hasDualColor = !!currentTheme.accent;
+  
+  // Primary = what inactive icons show (red for Spiderman, gray for single-color themes)
+  const inactiveColor = hasDualColor 
+    ? `hsl(${currentTheme.buttons.active})` 
+    : `hsl(${currentTheme.buttons.list})`;
+  
+  // Selected = what the active icon shows (blue for Spiderman, active color for single-color)
+  const activeColor = hasDualColor 
+    ? `hsl(${currentTheme.accent})` 
+    : `hsl(${currentTheme.buttons.active})`;
 
   // Get color based on active state
   const getIconColor = (active: boolean) => {
-    return active ? selectedColor : primaryColor;
+    return active ? activeColor : inactiveColor;
   };
 
-  // Menu glow color - uses accent when menu is open, primary otherwise
-  const menuGlowColor = isMenuOpen || isMenuActive ? currentTheme.accent || currentTheme.buttons.active : currentTheme.buttons.active;
+  // Menu glow color - uses active color by default, accent when menu is open (for dual-color themes)
+  const menuGlowColor = (isMenuOpen || isMenuActive) && hasDualColor
+    ? currentTheme.accent!
+    : currentTheme.buttons.active;
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 px-4 pb-4">
@@ -151,7 +161,7 @@ const MobileNavBar = () => {
 
             <span
               className="text-sm font-medium transition-colors duration-300 mt-1"
-              style={{ color: isMenuOpen || isMenuActive ? selectedColor : primaryColor }}
+              style={{ color: isMenuOpen || isMenuActive ? activeColor : inactiveColor }}
             >
               Menu
             </span>
