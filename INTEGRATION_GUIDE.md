@@ -1,100 +1,123 @@
 # MobileNavBar Integration Guide for p-stream
 
-This guide explains how to integrate the MobileNavBar component into your p-stream project.
+## AI Integration Instructions
+
+This guide is for AI assistants integrating the MobileNavBar into the p-stream project.
+
+---
 
 ## Files to Copy
 
-Copy these files from this project to your p-stream project:
+Copy these files from this project to p-stream:
 
-### 1. Theme Context
-```
-src/contexts/ThemeContext.tsx → your-project/src/contexts/ThemeContext.tsx
+| Source File | Destination |
+|------------|-------------|
+| `src/components/MobileNavBar.tsx` | `src/components/MobileNavBar.tsx` |
+| `src/components/MenuPopup.tsx` | `src/components/MenuPopup.tsx` |
+| `src/assets/nexus-logo.svg` | `src/assets/nexus-logo.svg` |
+
+---
+
+## Theme Integration
+
+The MobileNavBar reads theme colors from CSS variables. It expects p-stream's theme store to inject these variables into the document root.
+
+### Required CSS Variables
+
+The navbar looks for these CSS variables (with fallbacks):
+
+```typescript
+// In MobileNavBar.tsx - how colors are read:
+const inactiveHsl = getComputedColor("--colors-buttons-list", "0 0% 60%");
+const activeHsl = getComputedColor("--colors-buttons-active", "25 95% 53%");
+const bgColor = "hsl(var(--colors-background-main, 0 0% 8%))";
 ```
 
-### 2. Components
-```
-src/components/MobileNavBar.tsx → your-project/src/components/MobileNavBar.tsx
-src/components/MenuPopup.tsx → your-project/src/components/MenuPopup.tsx
-```
+### How to Inject CSS Variables from p-stream's Theme Store
 
-### 3. Assets
-```
-src/assets/nexus-logo.svg → your-project/src/assets/nexus-logo.svg
+In p-stream's theme store (likely in `themes/` folder), add this effect to inject CSS variables when a theme is selected:
+
+```typescript
+// Example: In your theme store or provider
+useEffect(() => {
+  const theme = currentTheme; // Your active theme object
+  
+  // Inject navbar-required variables
+  document.documentElement.style.setProperty(
+    "--colors-buttons-list", 
+    theme.buttons?.list || "0 0% 60%"
+  );
+  document.documentElement.style.setProperty(
+    "--colors-buttons-active", 
+    theme.buttons?.active || "25 95% 53%"
+  );
+  document.documentElement.style.setProperty(
+    "--colors-background-main", 
+    theme.background?.main || "0 0% 8%"
+  );
+  document.documentElement.style.setProperty(
+    "--colors-type-text", 
+    theme.type?.text || "0 0% 95%"
+  );
+}, [currentTheme]);
 ```
 
 ---
 
-## CSS Variables to Add
+## Theme Object Structure Expected
 
-Add these to your `index.css` or global CSS file:
+The navbar expects themes to have this structure (adjust to match p-stream's actual schema):
 
-```css
-:root {
-  /* Navigation specific */
-  --nav-background: 0 0% 8%;
-  --nav-foreground: 0 0% 95%;
-  --nav-glow: 25 95% 53%;
-  --nav-glow-intensity: 0.6;
-  --nav-inactive: 0 0% 60%;
-  --nav-active: 25 95% 53%;
-  --nav-accent: 25 95% 53%;
-}
-
-/* Glow utilities */
-@layer utilities {
-  .glow-orange {
-    filter: drop-shadow(0 0 8px hsl(var(--nav-glow) / var(--nav-glow-intensity)))
-            drop-shadow(0 0 20px hsl(var(--nav-glow) / calc(var(--nav-glow-intensity) * 0.5)));
-  }
-
-  .glow-pulse {
-    animation: glow-pulse 2s ease-in-out infinite;
-  }
-}
-
-@keyframes glow-pulse {
-  0%, 100% {
-    filter: drop-shadow(0 0 8px hsl(var(--nav-glow) / var(--nav-glow-intensity)))
-            drop-shadow(0 0 20px hsl(var(--nav-glow) / calc(var(--nav-glow-intensity) * 0.5)));
-  }
-  50% {
-    filter: drop-shadow(0 0 15px hsl(var(--nav-glow) / calc(var(--nav-glow-intensity) + 0.2)))
-            drop-shadow(0 0 35px hsl(var(--nav-glow) / var(--nav-glow-intensity)));
-  }
+```typescript
+interface Theme {
+  buttons: {
+    list: string;    // HSL value for inactive icons (e.g., "0 0% 60%")
+    active: string;  // HSL value for active icons (e.g., "25 95% 53%")
+  };
+  accent?: string;   // Optional secondary color for dual-color themes
+  background?: {
+    main: string;    // Dark background color (e.g., "0 0% 8%")
+  };
+  type?: {
+    text: string;    // Text color (e.g., "0 0% 95%")
+  };
 }
 ```
 
 ---
 
-## Integration Steps
+## Layout Integration
 
-### Step 1: Wrap App with ThemeProvider
-
-In your `main.tsx` or `App.tsx`:
+Add MobileNavBar to pages where it should be visible:
 
 ```tsx
-import { ThemeProvider } from "@/contexts/ThemeContext";
-
-// Wrap your app
-<ThemeProvider>
-  <App />
-</ThemeProvider>
-```
-
-### Step 2: Add MobileNavBar to Layout
-
-In your main layout component (excluding Settings/Onboarding):
-
-```tsx
+// In your page component
 import MobileNavBar from "@/components/MobileNavBar";
+
+const HomePage = () => {
+  return (
+    <div className="min-h-screen pb-24"> {/* pb-24 for navbar space */}
+      {/* Page content */}
+      <MobileNavBar />
+    </div>
+  );
+};
+```
+
+### Hide on Specific Routes
+
+To hide the navbar on settings/onboarding pages, use conditional rendering:
+
+```tsx
+// In your layout component
 import { useLocation } from "react-router-dom";
+import MobileNavBar from "@/components/MobileNavBar";
 
 const Layout = ({ children }) => {
   const location = useLocation();
   
-  // Hide navbar on these routes
   const hideNavRoutes = ["/settings", "/onboarding", "/login"];
-  const showNav = !hideNavRoutes.some(route => location.pathname.startsWith(route));
+  const showNav = !hideNavRoutes.some(r => location.pathname.startsWith(r));
   
   return (
     <div>
@@ -105,65 +128,82 @@ const Layout = ({ children }) => {
 };
 ```
 
-### Step 3: Connect to Your Existing Theme System
+---
 
-If p-stream already has a theme store, modify `ThemeContext.tsx` to use your existing themes:
+## CSS Utilities Required
 
-```tsx
-// In ThemeContext.tsx, import your existing themes
-import { useThemeStore } from "@/stores/theme"; // Your existing store
+Add these to p-stream's global CSS (index.css or similar):
 
-// Then sync the themes in useEffect
-useEffect(() => {
-  const pstreamTheme = useThemeStore.getState().currentTheme;
-  // Map your p-stream theme to this format
-  const mappedTheme = {
-    name: pstreamTheme.name,
-    buttons: {
-      list: pstreamTheme.inactive, // Your inactive color
-      active: pstreamTheme.primary, // Your primary color
-    },
-    accent: pstreamTheme.secondary, // Your secondary color (optional)
-  };
-  setCurrentTheme(mappedTheme);
-}, []);
+```css
+/* Glow animation for the center menu button */
+@keyframes glow-pulse {
+  0%, 100% {
+    filter: brightness(1);
+  }
+  50% {
+    filter: brightness(1.2);
+  }
+}
+
+.glow-pulse {
+  animation: glow-pulse 2s ease-in-out infinite;
+}
 ```
 
 ---
 
-## Theme Color Logic
+## Dependencies
 
-### Single Color Themes
-- `buttons.list` = Inactive icon color (usually gray)
-- `buttons.active` = Active icon color (the theme's main color)
+Ensure these are installed in p-stream (likely already present):
 
-### Dual Color Themes (has `accent`)
-- `buttons.list` = Inactive icon color
-- `buttons.active` = Primary active color (even-indexed icons: Home, Recent)
-- `accent` = Secondary active color (odd-indexed icons: Search, Profile)
-
-### Examples:
-| Theme | Active | Accent | Effect |
-|-------|--------|--------|--------|
-| Christmas | Green | Red | Home=Green, Search=Red, Recent=Green, Profile=Red |
-| Wolverine | Yellow | Blue | Home=Yellow, Search=Blue, Recent=Yellow, Profile=Blue |
-| Spiderman | Red | Blue | Home=Red, Search=Blue, Recent=Red, Profile=Blue |
+- `react-router-dom` (for navigation)
+- `lucide-react` (for icons)
 
 ---
 
-## Dependencies Required
+## Route Mapping for MenuPopup
 
-Make sure these are installed:
-```bash
-npm install react-router-dom lucide-react clsx tailwind-merge
+Update the paths in `MenuPopup.tsx` to match p-stream's actual routes:
+
+```typescript
+const menuItems = [
+  { id: "movies", label: "Movies", path: "/movies", emoji: "🎬" },
+  { id: "tvshows", label: "TV Shows", path: "/tv", emoji: "📺" },
+  { id: "anime", label: "Anime", path: "/anime", emoji: "✨" },
+  { id: "discover", label: "Discover", path: "/discover", emoji: "🧭" },
+  { id: "favorites", label: "Favorites", path: "/favorites", emoji: "❤️" },
+  { id: "settings", label: "Settings", path: "/settings", emoji: "⚙️" },
+];
 ```
 
 ---
 
-## Quick Test
+## Navbar Shape Specification
 
-After integration, test by:
-1. Navigate between pages - icons should change color
-2. Open the theme tester and switch themes
-3. Check dual-color themes show alternating colors on active icons
-4. Click Menu button - popup should appear with matching dark style
+The navbar has a custom border-radius: flat top corners, rounded bottom corners.
+
+```css
+border-radius: 12px 12px 32px 32px;
+```
+
+---
+
+## Testing After Integration
+
+1. **Theme switching**: Change themes in Settings → Appearance. Navbar should update colors instantly.
+2. **Navigation**: Tap each nav button. Active button should change color.
+3. **Menu popup**: Tap center button. Menu should slide up with theme colors.
+4. **Route hiding**: Navigate to `/settings`. Navbar should be hidden.
+
+---
+
+## Summary Checklist
+
+- [ ] Copy `MobileNavBar.tsx` to `src/components/`
+- [ ] Copy `MenuPopup.tsx` to `src/components/`
+- [ ] Copy `nexus-logo.svg` to `src/assets/`
+- [ ] Add CSS variable injection to theme store
+- [ ] Add `.glow-pulse` CSS animation
+- [ ] Add `<MobileNavBar />` to pages (with route-based hiding)
+- [ ] Update `MenuPopup` paths to match p-stream routes
+- [ ] Test theme switching and navigation
