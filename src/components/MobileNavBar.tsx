@@ -51,29 +51,36 @@ const MobileNavBar = () => {
   const isActive = (path: string) => location.pathname === path;
   const isMenuActive = location.pathname === "/menu";
 
-  // Get theme colors
+  // Get theme colors - dual color logic:
+  // Inactive icons = primary active color (e.g., red in Spiderman)
+  // Selected/active icon = accent color (e.g., blue in Spiderman), falls back to active if no accent
+  const primaryColor = `hsl(${currentTheme.buttons.active})`;
+  const selectedColor = currentTheme.accent ? `hsl(${currentTheme.accent})` : primaryColor;
   const inactiveColor = `hsl(${currentTheme.buttons.list})`;
-  const activeColor = `hsl(${currentTheme.buttons.active})`;
-  const accentColor = currentTheme.accent ? `hsl(${currentTheme.accent})` : activeColor;
 
-  // For dual-color themes, alternate active colors between items
-  const getActiveColor = (index: number) => {
-    if (currentTheme.accent) {
-      return index % 2 === 0 ? activeColor : accentColor;
-    }
-    return activeColor;
+  // Get color based on active state
+  const getIconColor = (active: boolean) => {
+    return active ? selectedColor : primaryColor;
   };
+
+  // Menu glow color - uses accent when menu is open, primary otherwise
+  const menuGlowColor = isMenuOpen || isMenuActive ? currentTheme.accent || currentTheme.buttons.active : currentTheme.buttons.active;
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 px-4 pb-4">
       <div className="relative mx-auto max-w-md">
         <div className="relative flex items-end justify-center">
-          <div className="flex w-full items-center justify-around rounded-[2rem] bg-[hsl(var(--nav-background))] px-6 py-4">
+          {/* Navbar with flat top corners, rounded bottom and sides */}
+          <div className="flex w-full items-center justify-around bg-[hsl(var(--nav-background))] px-6 py-4 rounded-b-[2rem] rounded-t-lg"
+            style={{
+              borderRadius: '12px 12px 32px 32px'
+            }}
+          >
             {/* Left side buttons */}
-            {navItems.slice(0, 2).map((item, index) => {
+            {navItems.slice(0, 2).map((item) => {
               const active = isActive(item.path);
               const Icon = item.icon;
-              const color = active ? getActiveColor(index) : inactiveColor;
+              const color = getIconColor(active);
 
               return (
                 <button
@@ -82,10 +89,7 @@ const MobileNavBar = () => {
                   className="relative flex flex-col items-center gap-1 active:scale-90 transition-transform duration-150"
                 >
                   <Icon
-                    className={cn(
-                      "relative h-7 w-7 transition-all duration-300",
-                      active && "glow-orange"
-                    )}
+                    className="relative h-7 w-7 transition-all duration-300"
                     style={{ color }}
                     strokeWidth={active ? 2.5 : 1.5}
                   />
@@ -103,11 +107,10 @@ const MobileNavBar = () => {
             <div className="w-20" />
 
             {/* Right side buttons */}
-            {navItems.slice(2).map((item, index) => {
+            {navItems.slice(2).map((item) => {
               const active = isActive(item.path);
               const Icon = item.icon;
-              // Continue index from left side (2, 3 for right side)
-              const color = active ? getActiveColor(index + 2) : inactiveColor;
+              const color = getIconColor(active);
 
               return (
                 <button
@@ -116,10 +119,7 @@ const MobileNavBar = () => {
                   className="relative flex flex-col items-center gap-1 active:scale-90 transition-transform duration-150"
                 >
                   <Icon
-                    className={cn(
-                      "relative h-7 w-7 transition-all duration-300",
-                      active && "glow-orange"
-                    )}
+                    className="relative h-7 w-7 transition-all duration-300"
                     style={{ color }}
                     strokeWidth={active ? 2.5 : 1.5}
                   />
@@ -143,17 +143,15 @@ const MobileNavBar = () => {
               className="relative flex items-center justify-center w-14 h-14 rounded-full glow-pulse -mt-10"
               style={{
                 background: `hsl(var(--nav-background))`,
-                boxShadow: `0 0 15px 3px hsl(var(--nav-glow)), 0 0 30px 8px hsl(var(--nav-glow) / 0.5), 0 0 45px 12px hsl(var(--nav-glow) / 0.3)`,
+                boxShadow: `0 0 15px 3px hsl(${menuGlowColor}), 0 0 30px 8px hsl(${menuGlowColor} / 0.5), 0 0 45px 12px hsl(${menuGlowColor} / 0.3)`,
               }}
             >
               <img src={nexusLogo} alt="Menu" className="h-7 w-7" />
             </div>
 
             <span
-              className={cn(
-                "text-sm font-medium transition-colors duration-300 mt-1",
-                isMenuActive || isMenuOpen ? "text-primary" : "text-[hsl(var(--nav-foreground))]",
-              )}
+              className="text-sm font-medium transition-colors duration-300 mt-1"
+              style={{ color: isMenuOpen || isMenuActive ? selectedColor : primaryColor }}
             >
               Menu
             </span>
