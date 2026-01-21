@@ -12,15 +12,16 @@ const SpinningRing = ({ size = 56, children }: SpinningRingProps) => {
   const [glowIndex, setGlowIndex] = useState(0);
   
   // Symbols for the ring (mystical glyphs)
-  const symbols = "◊△▽◁▷○◇⬡⬢◈⬟⬠⟐⟑⧫⬦◆●◐◑◒◓◔◕";
-  const symbolCount = 20;
-  const chevronCount = 5;
+  const symbols = "◊△▽◁▷○◇⬡⬢◈⬟⬠⟐⟑⧫⬦◆●◐◑";
+  const symbolCount = 18;
+  const chevronCount = 6;
   
-  // Animate the glow index to make symbols light up as they spin
+  // Animate the glow index - lights up ONE symbol at a time, cycling around the ring
+  // Like pressing buttons one by one around the stargate
   useEffect(() => {
     const interval = setInterval(() => {
       setGlowIndex((prev) => (prev + 1) % symbolCount);
-    }, 400);
+    }, 300); // Speed of the "button press" cycling
     return () => clearInterval(interval);
   }, []);
   
@@ -80,12 +81,8 @@ const SpinningRing = ({ size = 56, children }: SpinningRingProps) => {
             const y = 50 + 44 * Math.sin(radians);
             const symbol = symbols[i % symbols.length];
             
-            // Determine if this symbol should glow
-            const isGlowing = i === glowIndex || 
-                              i === (glowIndex + 4) % symbolCount || 
-                              i === (glowIndex + 8) % symbolCount || 
-                              i === (glowIndex + 12) % symbolCount ||
-                              i === (glowIndex + 16) % symbolCount;
+            // Only ONE symbol glows at a time - like pressing buttons one by one
+            const isGlowing = i === glowIndex;
             
             return (
               <text
@@ -114,8 +111,8 @@ const SpinningRing = ({ size = 56, children }: SpinningRingProps) => {
             const x = 50 + 44 * Math.cos(radians);
             const y = 50 + 44 * Math.sin(radians);
             
-            // Chevron lights up based on rotation
-            const isActive = Math.floor(glowIndex / 4) === i;
+            // Chevron lights up when the glow passes near it (every 3 symbols = 1 chevron)
+            const isActive = Math.floor(glowIndex / 3) === i;
             
             return (
               <g key={`chevron-${i}`}>
