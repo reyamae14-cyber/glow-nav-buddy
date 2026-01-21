@@ -128,10 +128,10 @@ const MobileNavBar = () => {
             })}
           </div>
 
-          {/* Center Menu button - half in/half out of navbar */}
+          {/* Center Menu button - floating circle */}
           <button
             onClick={() => setIsMenuOpen(true)}
-            className="absolute left-1/2 -translate-x-1/2 -top-9 flex flex-col items-center active:scale-95 transition-transform duration-150"
+            className="absolute left-1/2 -translate-x-1/2 -top-9 flex items-center justify-center active:scale-95 transition-transform duration-150"
           >
             <div
               className="relative flex items-center justify-center w-[72px] h-[72px] rounded-full glow-pulse"
@@ -142,9 +142,15 @@ const MobileNavBar = () => {
             >
               <img src={nexusLogo} alt="Menu" className="h-9 w-9" />
             </div>
+          </button>
 
+          {/* Menu text label - aligned with other nav labels */}
+          <button
+            onClick={() => setIsMenuOpen(true)}
+            className="absolute left-1/2 -translate-x-1/2 bottom-4 flex flex-col items-center"
+          >
             <span
-              className="text-sm font-medium transition-colors duration-300 mt-1"
+              className="text-sm font-medium transition-colors duration-300"
               style={{ color: isMenuOpen || isMenuActive ? activeColor : inactiveColor }}
             >
               Menu
