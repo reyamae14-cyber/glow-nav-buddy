@@ -12,7 +12,80 @@ Copy these files to your project:
 
 1. `src/components/MobileNavBar.tsx` - Main navigation bar
 2. `src/components/MenuPopup.tsx` - Floating menu popup
-3. `src/assets/nexus-logo.svg` - Menu button logo
+3. `src/components/ThemeTester.tsx` - Theme selector component (optional, for testing)
+4. `src/assets/nexus-logo.svg` - Menu button logo
+
+---
+
+## 🎨 Available Themes (23 Total)
+
+Place the themes in your theme store or use the `ThemeTester` component. All colors are in HSL format.
+
+### Theme Definitions
+
+```typescript
+interface Theme {
+  name: string;
+  buttons: { list: string; active: string };
+  background: { main: string };
+}
+
+const themes: Theme[] = [
+  // Primary colors
+  { name: "Blue", buttons: { list: "0 0% 60%", active: "210 100% 50%" }, background: { main: "0 0% 8%" } },
+  { name: "Red", buttons: { list: "0 0% 60%", active: "0 70% 50%" }, background: { main: "0 0% 8%" } },
+  { name: "Green", buttons: { list: "0 0% 60%", active: "150 40% 50%" }, background: { main: "0 0% 8%" } },
+  { name: "Orange", buttons: { list: "0 0% 60%", active: "30 100% 50%" }, background: { main: "0 0% 8%" } },
+  { name: "Purple", buttons: { list: "0 0% 60%", active: "270 40% 50%" }, background: { main: "0 0% 8%" } },
+  { name: "Pink", buttons: { list: "0 0% 60%", active: "330 60% 50%" }, background: { main: "0 0% 8%" } },
+  { name: "Cyan", buttons: { list: "0 0% 60%", active: "180 100% 45%" }, background: { main: "0 0% 8%" } },
+  { name: "Gold", buttons: { list: "0 0% 60%", active: "45 80% 50%" }, background: { main: "0 0% 8%" } },
+  
+  // Metallic themes
+  { name: "Silver", buttons: { list: "0 0% 60%", active: "210 10% 75%" }, background: { main: "0 0% 8%" } },
+  { name: "Iron", buttons: { list: "0 0% 60%", active: "210 5% 50%" }, background: { main: "0 0% 8%" } },
+  { name: "Bronze", buttons: { list: "0 0% 60%", active: "30 50% 50%" }, background: { main: "0 0% 8%" } },
+  { name: "Copper", buttons: { list: "0 0% 60%", active: "20 70% 50%" }, background: { main: "0 0% 8%" } },
+  { name: "Platinum", buttons: { list: "0 0% 60%", active: "240 10% 75%" }, background: { main: "0 0% 8%" } },
+  { name: "Titanium", buttons: { list: "0 0% 60%", active: "210 5% 75%" }, background: { main: "0 0% 8%" } },
+  { name: "Zinc", buttons: { list: "0 0% 60%", active: "200 20% 75%" }, background: { main: "0 0% 8%" } },
+  { name: "Lead", buttons: { list: "0 0% 60%", active: "220 10% 50%" }, background: { main: "0 0% 8%" } },
+  { name: "Sulfur", buttons: { list: "0 0% 60%", active: "40 80% 50%" }, background: { main: "0 0% 8%" } },
+  
+  // Neutral themes
+  { name: "Noir", buttons: { list: "0 0% 60%", active: "0 0% 95%" }, background: { main: "0 0% 5%" } },
+  { name: "Grey", buttons: { list: "0 0% 60%", active: "220 10% 65%" }, background: { main: "0 0% 8%" } },
+  { name: "Dark", buttons: { list: "0 0% 60%", active: "220 10% 50%" }, background: { main: "0 0% 5%" } },
+  { name: "Light", buttons: { list: "0 0% 40%", active: "270 40% 50%" }, background: { main: "0 0% 95%" } },
+  
+  // Special themes
+  { name: "Christmas", buttons: { list: "0 0% 60%", active: "0 70% 50%" }, background: { main: "150 40% 8%" } },
+  { name: "Spiderman", buttons: { list: "0 0% 60%", active: "0 70% 50%" }, background: { main: "210 100% 8%" } },
+];
+```
+
+### Theme Categories
+
+| Category | Themes |
+|----------|--------|
+| **Primary** | Blue, Red, Green, Orange, Purple, Pink, Cyan, Gold |
+| **Metallic** | Silver, Iron, Bronze, Copper, Platinum, Titanium, Zinc, Lead, Sulfur |
+| **Neutral** | Noir, Grey, Dark, Light |
+| **Special** | Christmas, Spiderman |
+
+### Applying a Theme
+
+```typescript
+const applyTheme = (theme: Theme) => {
+  const root = document.documentElement;
+  root.style.setProperty("--colors-buttons-list", theme.buttons.list);
+  root.style.setProperty("--colors-buttons-active", theme.buttons.active);
+  root.style.setProperty("--colors-background-main", theme.background.main);
+  
+  // Notify navbar of theme change
+  window.dispatchEvent(new Event("theme-change"));
+};
+```
 
 ---
 
