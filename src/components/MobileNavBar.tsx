@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Home, Search, History, User } from "lucide-react";
 import nexusLogo from "@/assets/nexus-logo.svg";
@@ -20,36 +20,32 @@ const navItems: NavItem[] = [
 
 /**
  * MobileNavBar Component for p-stream
- * 
- * This component reads theme colors from CSS variables that p-stream's
- * theme store injects into the document. No additional context needed.
- * 
- * Required CSS variables (injected by p-stream's theme system):
- * - --nav-background: Background color of the navbar (dark)
- * - --nav-foreground: Text color for the navbar
- * - --colors-buttons-list: Inactive icon/text color (gray)
- * - --colors-buttons-active: Active icon/text color (theme primary)
- * - --colors-accent: Optional secondary color for dual-color themes
- * 
- * Fallback: If CSS variables are not set, uses default gray/orange colors.
  */
 const MobileNavBar = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [, setThemeUpdate] = useState(0);
 
   const isActive = (path: string) => location.pathname === path;
   const isMenuActive = location.pathname === "/menu";
 
-  // Read colors from CSS variables (set by p-stream's theme store)
-  // Fallback to default gray/orange if not set
-  const getComputedColor = (varName: string, fallback: string) => {
+  // Read colors from CSS variables
+  const getComputedColor = useCallback((varName: string, fallback: string) => {
     if (typeof window === "undefined") return fallback;
     const value = getComputedStyle(document.documentElement).getPropertyValue(varName).trim();
     return value || fallback;
-  };
+  }, []);
 
-  // p-stream theme CSS variables mapping
+  // Listen for theme changes
+  useEffect(() => {
+    const handleThemeChange = () => {
+      setThemeUpdate((prev) => prev + 1);
+    };
+    window.addEventListener("theme-change", handleThemeChange);
+    return () => window.removeEventListener("theme-change", handleThemeChange);
+  }, []);
+
   const inactiveHsl = getComputedColor("--colors-buttons-list", "0 0% 60%");
   const activeHsl = getComputedColor("--colors-buttons-active", "25 95% 53%");
   
