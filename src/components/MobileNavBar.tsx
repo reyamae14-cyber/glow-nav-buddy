@@ -154,25 +154,14 @@ const MobileNavBar = ({ theme }: MobileNavBarProps) => {
                 boxShadow: `0 0 15px 3px hsl(${glowColor}), 0 0 30px 8px hsl(${glowColor} / 0.5), 0 0 45px 12px hsl(${glowColor} / 0.3)`,
               }}
             >
-              {/* Fire glow effect at top - only when active */}
-              {isMenuActive && (
-                <div 
-                  className="absolute -top-2 left-1/2 -translate-x-1/2 w-4 h-4 rounded-full"
-                  style={{
-                    background: `radial-gradient(circle, hsl(${glowColor}) 0%, hsl(${glowColor} / 0.5) 40%, transparent 70%)`,
-                    filter: `blur(2px)`,
-                  }}
-                />
-              )}
-              
-              {/* Logo centered inside with glow when active */}
+              {/* Logo centered inside - glows when active like other icons */}
               <img 
                 src={nexusLogo}
                 alt="Menu"
                 className="h-7 w-7 transition-all duration-300"
                 style={{
                   filter: isMenuActive 
-                    ? `drop-shadow(0 0 8px hsl(${glowColor} / 0.8)) drop-shadow(0 0 16px hsl(${glowColor} / 0.5)) drop-shadow(0 0 24px hsl(${glowColor} / 0.3))`
+                    ? `drop-shadow(0 0 8px hsl(${glowColor} / 0.6)) drop-shadow(0 0 20px hsl(${glowColor} / 0.3))`
                     : undefined
                 }}
               />
