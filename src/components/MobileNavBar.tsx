@@ -75,13 +75,13 @@ const MobileNavBar = ({ theme }: MobileNavBarProps) => {
                     {item.label}
                   </span>
                   
-                  {/* Fire glow effect below text */}
+                  {/* Glowing dot below text */}
                   {active && (
                     <div 
-                      className="absolute -bottom-3 left-1/2 -translate-x-1/2 w-4 h-4 rounded-full"
+                      className="absolute -bottom-3 left-1/2 -translate-x-1/2 w-2.5 h-2.5 rounded-full"
                       style={{
-                        background: `radial-gradient(circle, hsl(${glowColor}) 0%, hsl(${glowColor} / 0.5) 40%, transparent 70%)`,
-                        filter: `blur(2px)`,
+                        background: `hsl(${glowColor})`,
+                        boxShadow: `0 0 6px 2px hsl(${glowColor}), 0 0 12px 4px hsl(${glowColor} / 0.6)`,
                       }}
                     />
                   )}
@@ -126,13 +126,13 @@ const MobileNavBar = ({ theme }: MobileNavBarProps) => {
                     {item.label}
                   </span>
                   
-                  {/* Fire glow effect below text */}
+                  {/* Glowing dot below text */}
                   {active && (
                     <div 
-                      className="absolute -bottom-3 left-1/2 -translate-x-1/2 w-4 h-4 rounded-full"
+                      className="absolute -bottom-3 left-1/2 -translate-x-1/2 w-2.5 h-2.5 rounded-full"
                       style={{
-                        background: `radial-gradient(circle, hsl(${glowColor}) 0%, hsl(${glowColor} / 0.5) 40%, transparent 70%)`,
-                        filter: `blur(2px)`,
+                        background: `hsl(${glowColor})`,
+                        boxShadow: `0 0 6px 2px hsl(${glowColor}), 0 0 12px 4px hsl(${glowColor} / 0.6)`,
                       }}
                     />
                   )}
