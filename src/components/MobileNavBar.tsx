@@ -52,17 +52,6 @@ const MobileNavBar = ({ theme }: MobileNavBarProps) => {
                   onClick={() => navigate(item.path)}
                   className="relative flex flex-col items-center gap-1 active:scale-90 transition-transform duration-150"
                 >
-                  {/* Fire glow effect at top */}
-                  {active && (
-                    <div 
-                      className="absolute -top-2 left-1/2 -translate-x-1/2 w-4 h-4 rounded-full"
-                      style={{
-                        background: `radial-gradient(circle, hsl(${glowColor}) 0%, hsl(${glowColor} / 0.5) 40%, transparent 70%)`,
-                        filter: `blur(2px)`,
-                      }}
-                    />
-                  )}
-                  
                   <Icon
                     className={cn(
                       "relative h-7 w-7 transition-all duration-300",
@@ -85,6 +74,17 @@ const MobileNavBar = ({ theme }: MobileNavBarProps) => {
                   >
                     {item.label}
                   </span>
+                  
+                  {/* Fire glow effect below text */}
+                  {active && (
+                    <div 
+                      className="absolute -bottom-3 left-1/2 -translate-x-1/2 w-4 h-4 rounded-full"
+                      style={{
+                        background: `radial-gradient(circle, hsl(${glowColor}) 0%, hsl(${glowColor} / 0.5) 40%, transparent 70%)`,
+                        filter: `blur(2px)`,
+                      }}
+                    />
+                  )}
                 </button>
               );
             })}
@@ -103,17 +103,6 @@ const MobileNavBar = ({ theme }: MobileNavBarProps) => {
                   onClick={() => navigate(item.path)}
                   className="relative flex flex-col items-center gap-1 active:scale-90 transition-transform duration-150"
                 >
-                  {/* Fire glow effect at top */}
-                  {active && (
-                    <div 
-                      className="absolute -top-2 left-1/2 -translate-x-1/2 w-4 h-4 rounded-full"
-                      style={{
-                        background: `radial-gradient(circle, hsl(${glowColor}) 0%, hsl(${glowColor} / 0.5) 40%, transparent 70%)`,
-                        filter: `blur(2px)`,
-                      }}
-                    />
-                  )}
-                  
                   <Icon
                     className={cn(
                       "relative h-7 w-7 transition-all duration-300",
@@ -136,6 +125,17 @@ const MobileNavBar = ({ theme }: MobileNavBarProps) => {
                   >
                     {item.label}
                   </span>
+                  
+                  {/* Fire glow effect below text */}
+                  {active && (
+                    <div 
+                      className="absolute -bottom-3 left-1/2 -translate-x-1/2 w-4 h-4 rounded-full"
+                      style={{
+                        background: `radial-gradient(circle, hsl(${glowColor}) 0%, hsl(${glowColor} / 0.5) 40%, transparent 70%)`,
+                        filter: `blur(2px)`,
+                      }}
+                    />
+                  )}
                 </button>
               );
             })}
