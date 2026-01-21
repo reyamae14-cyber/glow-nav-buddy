@@ -37,14 +37,14 @@ const MenuPopup = ({ isOpen, onClose }: MenuPopupProps) => {
 
   return (
     <>
-      {/* Backdrop */}
+      {/* Backdrop - z-[60] to be above navbar (z-50) */}
       <div 
-        className="fixed inset-0 bg-black/60 z-40"
+        className="fixed inset-0 bg-black/60 z-[60]"
         onClick={onClose}
       />
       
-      {/* Menu Box */}
-      <div className="fixed bottom-28 left-1/2 -translate-x-1/2 z-50 w-[280px] animate-in fade-in slide-in-from-bottom-4 duration-200">
+      {/* Menu Box - z-[70] to be above backdrop and navbar */}
+      <div className="fixed bottom-28 left-1/2 -translate-x-1/2 z-[70] w-[280px] animate-in fade-in slide-in-from-bottom-4 duration-200">
         <div 
           className="rounded-2xl p-4 shadow-xl border border-white/10"
           style={{ background: `hsl(var(--colors-background-main, 0 0% 8%))` }}
