@@ -9,7 +9,7 @@ export interface ThemeColors {
   accent?: string;
 }
 
-// All 23 themes
+// All 23 themes - some with dual colors (accent)
 export const themes: ThemeColors[] = [
   { name: "Harvest", buttons: { list: "0 0% 60%", active: "25 95% 53%" } },
   { name: "Ocean", buttons: { list: "200 15% 50%", active: "200 80% 55%" } },
@@ -22,17 +22,17 @@ export const themes: ThemeColors[] = [
   { name: "Coral", buttons: { list: "15 20% 50%", active: "16 85% 60%" } },
   { name: "Lavender", buttons: { list: "260 15% 55%", active: "260 60% 70%" } },
   { name: "Mint", buttons: { list: "150 15% 45%", active: "160 50% 55%" } },
-  { name: "Ruby", buttons: { list: "0 15% 45%", active: "0 75% 50%" } },
-  { name: "Sapphire", buttons: { list: "220 20% 45%", active: "220 80% 55%" } },
+  { name: "Ruby", buttons: { list: "0 15% 45%", active: "0 75% 50%" }, accent: "330 80% 55%" },
+  { name: "Sapphire", buttons: { list: "220 20% 45%", active: "220 80% 55%" }, accent: "260 70% 60%" },
   { name: "Emerald", buttons: { list: "140 15% 40%", active: "140 70% 45%" } },
-  { name: "Amber", buttons: { list: "30 20% 45%", active: "38 95% 50%" } },
-  { name: "Teal", buttons: { list: "180 15% 40%", active: "180 70% 45%" } },
-  { name: "Crimson", buttons: { list: "350 15% 45%", active: "350 80% 50%" } },
-  { name: "Indigo", buttons: { list: "240 20% 45%", active: "240 70% 55%" } },
-  { name: "Lime", buttons: { list: "80 15% 40%", active: "80 70% 50%" } },
-  { name: "Magenta", buttons: { list: "300 15% 45%", active: "300 75% 55%" } },
-  { name: "Sky", buttons: { list: "190 15% 50%", active: "195 85% 55%" } },
-  { name: "Peach", buttons: { list: "20 20% 55%", active: "25 80% 65%" } },
+  { name: "Amber", buttons: { list: "30 20% 45%", active: "38 95% 50%" }, accent: "15 90% 55%" },
+  { name: "Teal", buttons: { list: "180 15% 40%", active: "180 70% 45%" }, accent: "200 75% 50%" },
+  { name: "Crimson", buttons: { list: "350 15% 45%", active: "350 80% 50%" }, accent: "20 90% 55%" },
+  { name: "Indigo", buttons: { list: "240 20% 45%", active: "240 70% 55%" }, accent: "280 65% 60%" },
+  { name: "Lime", buttons: { list: "80 15% 40%", active: "80 70% 50%" }, accent: "120 60% 45%" },
+  { name: "Magenta", buttons: { list: "300 15% 45%", active: "300 75% 55%" }, accent: "330 80% 60%" },
+  { name: "Sky", buttons: { list: "190 15% 50%", active: "195 85% 55%" }, accent: "210 80% 60%" },
+  { name: "Peach", buttons: { list: "20 20% 55%", active: "25 80% 65%" }, accent: "350 70% 60%" },
   { name: "Slate", buttons: { list: "210 10% 50%", active: "210 40% 60%" } },
 ];
 
