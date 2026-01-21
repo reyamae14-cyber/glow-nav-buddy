@@ -1,3 +1,5 @@
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
 import {
   Select,
   SelectContent,
@@ -14,7 +16,7 @@ interface Theme {
 
 const themes: Theme[] = [
   {
-    name: "Orange (Default)",
+    name: "Orange",
     buttons: { list: "0 0% 60%", active: "25 95% 53%" },
     background: { main: "0 0% 8%" },
   },
@@ -43,27 +45,42 @@ const themes: Theme[] = [
     buttons: { list: "0 0% 60%", active: "330 85% 60%" },
     background: { main: "330 20% 10%" },
   },
+  {
+    name: "Cyan",
+    buttons: { list: "0 0% 60%", active: "180 100% 45%" },
+    background: { main: "180 20% 8%" },
+  },
+  {
+    name: "Gold",
+    buttons: { list: "0 0% 60%", active: "45 100% 50%" },
+    background: { main: "45 20% 8%" },
+  },
 ];
 
 const ThemeTester = () => {
-  const applyTheme = (themeName: string) => {
-    const theme = themes.find((t) => t.name === themeName);
+  const [selectedTheme, setSelectedTheme] = useState("Orange");
+
+  const applyTheme = () => {
+    const theme = themes.find((t) => t.name === selectedTheme);
     if (!theme) return;
 
     const root = document.documentElement;
     root.style.setProperty("--colors-buttons-list", theme.buttons.list);
     root.style.setProperty("--colors-buttons-active", theme.buttons.active);
     root.style.setProperty("--colors-background-main", theme.background.main);
+    
+    // Force re-render by dispatching a custom event
+    window.dispatchEvent(new Event("theme-change"));
   };
 
   return (
-    <div className="flex items-center gap-2">
-      <span className="text-sm text-muted-foreground">Themes Tester:</span>
-      <Select onValueChange={applyTheme} defaultValue="Orange (Default)">
-        <SelectTrigger className="w-40">
+    <div className="flex items-center gap-3">
+      <span className="text-sm font-medium text-foreground">Themes Tester:</span>
+      <Select value={selectedTheme} onValueChange={setSelectedTheme}>
+        <SelectTrigger className="w-32">
           <SelectValue placeholder="Select theme" />
         </SelectTrigger>
-        <SelectContent>
+        <SelectContent className="bg-popover">
           {themes.map((theme) => (
             <SelectItem key={theme.name} value={theme.name}>
               {theme.name}
@@ -71,6 +88,9 @@ const ThemeTester = () => {
           ))}
         </SelectContent>
       </Select>
+      <Button onClick={applyTheme} size="sm">
+        Apply
+      </Button>
     </div>
   );
 };
