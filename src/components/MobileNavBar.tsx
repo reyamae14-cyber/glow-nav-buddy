@@ -147,10 +147,10 @@ const MobileNavBar = () => {
             })}
           </div>
 
-          {/* Center Menu button - floating above the bar */}
+          {/* Center Menu button - floating half outside the bar */}
           <button
             onClick={() => navigate("/menu")}
-            className="absolute left-1/2 -translate-x-1/2 bottom-3 flex flex-col items-center gap-1 active:scale-95 transition-transform duration-150"
+            className="absolute left-1/2 -translate-x-1/2 -top-7 flex flex-col items-center gap-1 active:scale-95 transition-transform duration-150"
           >
             {/* Black circle with orange glow */}
             <div 
