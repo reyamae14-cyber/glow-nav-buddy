@@ -1,7 +1,9 @@
+import { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Home, Search, History, User } from "lucide-react";
 import nexusLogo from "@/assets/nexus-logo.svg";
 import { cn } from "@/lib/utils";
+import MenuPopup from "./MenuPopup";
 
 interface NavItem {
   id: string;
@@ -20,6 +22,7 @@ const navItems: NavItem[] = [
 const MobileNavBar = () => {
   const location = useLocation();
   const navigate = useNavigate();
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const isActive = (path: string) => location.pathname === path;
   const isMenuActive = location.pathname === "/menu";
@@ -99,7 +102,7 @@ const MobileNavBar = () => {
 
           {/* Center Menu button */}
           <button
-            onClick={() => navigate("/menu")}
+            onClick={() => setIsMenuOpen(true)}
             className="absolute left-1/2 -translate-x-1/2 bottom-4 flex flex-col items-center active:scale-95 transition-transform duration-150"
           >
             <div
@@ -115,7 +118,7 @@ const MobileNavBar = () => {
             <span
               className={cn(
                 "text-sm font-medium transition-colors duration-300 mt-1",
-                isMenuActive ? "text-primary" : "text-[hsl(var(--nav-foreground))]",
+                isMenuActive || isMenuOpen ? "text-primary" : "text-[hsl(var(--nav-foreground))]",
               )}
             >
               Menu
@@ -123,6 +126,9 @@ const MobileNavBar = () => {
           </button>
         </div>
       </div>
+      
+      {/* Menu Popup */}
+      <MenuPopup isOpen={isMenuOpen} onClose={() => setIsMenuOpen(false)} />
     </nav>
   );
 };
