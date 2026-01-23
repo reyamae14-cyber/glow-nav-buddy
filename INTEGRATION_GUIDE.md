@@ -1,282 +1,127 @@
-# P-Stream Mobile Navigation Bar - Complete Integration Guide
+# P-STREAM Mobile Navigation - Complete Integration Guide
 
-> **⚠️ IMPORTANT: DO NOT MODIFY NAVBAR DIMENSIONS**  
-> The navbar sizes, spacing, and layout are fully optimized for mobile displays.  
-> Do not change: icon sizes (h-7 w-7, h-9 w-9), button sizes (w-[72px] h-[72px]), spacing (py-4, w-20), or positioning (-top-9, bottom-4).
+> **⚠️ LOCKED SPECIFICATIONS - DO NOT MODIFY**  
+> All dimensions, colors, and positions are optimized and locked.
 
 ---
 
-## 🧠 For AI Assistants: How This Integration Works
+## 🤖 AI AGENT QUICK INTEGRATION
 
-### Theme Source
-The 23 themes were extracted from the **p-stream** project repository:
-- **Source**: `https://github.com/p-stream/p-stream`
-- **Location in p-stream**: Theme definitions are stored in the theme store (typically `src/stores/theme/`)
-
-### Architecture: Theme → Navbar Connection
-
-The navbar does NOT import themes directly. Instead, it reads colors from **CSS variables** injected into the document root. This decouples the navbar from the theme store.
-
+### Step 1: Copy Files
 ```
-┌─────────────────────┐
-│   Theme Store       │  (holds currentTheme object)
-│   (useThemeStore)   │
-└─────────┬───────────┘
-          │ useEffect: when theme changes
-          ▼
-┌─────────────────────────────────────────┐
-│   document.documentElement.style        │
-│   (CSS Variables on :root)              │
-│                                         │
-│   --colors-buttons-list: "0 0% 60%"     │
-│   --colors-buttons-active: "210 100% 50%"│
-│   --colors-background-main: "0 0% 8%"   │
-│   --colors-type-text: "0 0% 95%"        │
-└─────────┬───────────────────────────────┘
-          │ window.dispatchEvent("theme-change")
-          ▼
-┌─────────────────────┐
-│   MobileNavBar      │  (listens for "theme-change" event)
-│   & MenuPopup       │  (reads CSS vars via getComputedStyle)
-└─────────────────────┘
+src/components/MobileNavBar.tsx
+src/components/MenuPopup.tsx  
+src/assets/nexus-logo.svg
 ```
 
-### Z-Index Hierarchy (CRITICAL)
-
-The components use specific z-index values to ensure proper layering:
-
-| Element | Z-Index | Purpose |
-|---------|---------|---------|
-| Navbar container | `z-50` | Base navbar layer |
-| MenuPopup backdrop | `z-[60]` | Dim overlay above navbar |
-| MenuPopup box | `z-[70]` | Menu content above backdrop |
-| Floating menu button | `z-[80]` | Always on top, never covered |
-
-**Why?** The floating menu button must NEVER be covered by the popup. Users can tap it to close the menu.
-
-### Step-by-Step: Making Themes Work
-
-**Step 1: Store themes in your theme store**
-
-```typescript
-// src/stores/theme/index.ts (or useThemeStore.ts)
-import { create } from 'zustand';
-
-interface Theme {
-  name: string;
-  buttons: { list: string; active: string };
-  background: { main: string };
-}
-
-interface ThemeStore {
-  currentTheme: Theme;
-  themes: Theme[];
-  setTheme: (themeName: string) => void;
-}
-
-export const useThemeStore = create<ThemeStore>((set, get) => ({
-  themes: [
-    // All 23 themes go here (see theme list below)
-    { name: "Blue", buttons: { list: "0 0% 60%", active: "210 100% 50%" }, background: { main: "0 0% 8%" } },
-    // ... rest of themes
-  ],
-  currentTheme: { name: "Blue", buttons: { list: "0 0% 60%", active: "210 100% 50%" }, background: { main: "0 0% 8%" } },
-  setTheme: (themeName) => {
-    const theme = get().themes.find(t => t.name === themeName);
-    if (theme) set({ currentTheme: theme });
-  },
-}));
-```
-
-**Step 2: Create a ThemeProvider that injects CSS variables**
-
-```typescript
-// src/providers/ThemeProvider.tsx
-import { useEffect } from 'react';
-import { useThemeStore } from '@/stores/theme';
-
-export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
-  const currentTheme = useThemeStore((state) => state.currentTheme);
-
-  useEffect(() => {
-    const root = document.documentElement;
-    
-    // Inject theme colors as CSS variables (HSL values WITHOUT hsl() wrapper)
-    root.style.setProperty("--colors-buttons-list", currentTheme.buttons.list);
-    root.style.setProperty("--colors-buttons-active", currentTheme.buttons.active);
-    root.style.setProperty("--colors-background-main", currentTheme.background.main);
-    root.style.setProperty("--colors-type-text", "0 0% 95%"); // Default text color
-    
-    // CRITICAL: Dispatch event so navbar re-reads colors
-    window.dispatchEvent(new Event("theme-change"));
-  }, [currentTheme]);
-
-  return <>{children}</>;
-};
-```
-
-**Step 3: Wrap your app with ThemeProvider**
-
-```typescript
-// src/App.tsx
-import { ThemeProvider } from '@/providers/ThemeProvider';
-import MobileNavBar from '@/components/MobileNavBar';
+### Step 2: Add to Layout
+```tsx
+import MobileNavBar from "@/components/MobileNavBar";
 
 function App() {
   return (
-    <ThemeProvider>
-      <div className="min-h-screen pb-24">
-        {/* Your routes/content */}
-        <MobileNavBar />
-      </div>
-    </ThemeProvider>
+    <div className="min-h-screen pb-24">
+      {/* Your content */}
+      <MobileNavBar />
+    </div>
   );
 }
 ```
 
-**Step 4: Navbar reads colors via getComputedStyle**
-
-The navbar uses this pattern to read theme colors:
-
+### Step 3: Connect Theme (Optional)
 ```typescript
-// Inside MobileNavBar.tsx
-const getComputedColor = useCallback((varName: string, fallback: string) => {
-  const value = getComputedStyle(document.documentElement)
-    .getPropertyValue(varName)
-    .trim();
-  return value || fallback;
-}, []);
-
-// Listen for theme changes
 useEffect(() => {
-  const handleThemeChange = () => setThemeUpdate(prev => prev + 1);
-  window.addEventListener("theme-change", handleThemeChange);
-  return () => window.removeEventListener("theme-change", handleThemeChange);
-}, []);
-
-// Use colors (wrapping HSL values with hsl())
-const inactiveColor = `hsl(${getComputedColor("--colors-buttons-list", "0 0% 60%")})`;
-const activeColor = `hsl(${getComputedColor("--colors-buttons-active", "25 95% 53%")})`;
-```
-
-### Why This Pattern?
-
-1. **Decoupling**: Navbar doesn't need to import theme store
-2. **Performance**: CSS variables are native browser feature
-3. **Flexibility**: Any component can read theme colors
-4. **Event-driven**: Components react to changes instantly
-
----
-
-## 📁 Required Files
-
-Copy these files to your project:
-
-1. `src/components/MobileNavBar.tsx` - Main navigation bar
-2. `src/components/MenuPopup.tsx` - Floating menu popup with animations
-3. `src/components/ThemeTester.tsx` - Theme selector component (optional, for testing)
-4. `src/assets/nexus-logo.svg` - Menu button logo
-
----
-
-## 🎨 Available Themes (23 Total)
-
-Place the themes in your theme store or use the `ThemeTester` component. All colors are in HSL format.
-
-### Theme Definitions
-
-```typescript
-interface Theme {
-  name: string;
-  buttons: { list: string; active: string };
-  background: { main: string };
-}
-
-const themes: Theme[] = [
-  // Primary colors
-  { name: "Blue", buttons: { list: "0 0% 60%", active: "210 100% 50%" }, background: { main: "0 0% 8%" } },
-  { name: "Red", buttons: { list: "0 0% 60%", active: "0 70% 50%" }, background: { main: "0 0% 8%" } },
-  { name: "Green", buttons: { list: "0 0% 60%", active: "150 40% 50%" }, background: { main: "0 0% 8%" } },
-  { name: "Orange", buttons: { list: "0 0% 60%", active: "30 100% 50%" }, background: { main: "0 0% 8%" } },
-  { name: "Purple", buttons: { list: "0 0% 60%", active: "270 40% 50%" }, background: { main: "0 0% 8%" } },
-  { name: "Pink", buttons: { list: "0 0% 60%", active: "330 60% 50%" }, background: { main: "0 0% 8%" } },
-  { name: "Cyan", buttons: { list: "0 0% 60%", active: "180 100% 45%" }, background: { main: "0 0% 8%" } },
-  { name: "Gold", buttons: { list: "0 0% 60%", active: "45 80% 50%" }, background: { main: "0 0% 8%" } },
-  
-  // Metallic themes
-  { name: "Silver", buttons: { list: "0 0% 60%", active: "210 10% 75%" }, background: { main: "0 0% 8%" } },
-  { name: "Iron", buttons: { list: "0 0% 60%", active: "210 5% 50%" }, background: { main: "0 0% 8%" } },
-  { name: "Bronze", buttons: { list: "0 0% 60%", active: "30 50% 50%" }, background: { main: "0 0% 8%" } },
-  { name: "Copper", buttons: { list: "0 0% 60%", active: "20 70% 50%" }, background: { main: "0 0% 8%" } },
-  { name: "Platinum", buttons: { list: "0 0% 60%", active: "240 10% 75%" }, background: { main: "0 0% 8%" } },
-  { name: "Titanium", buttons: { list: "0 0% 60%", active: "210 5% 75%" }, background: { main: "0 0% 8%" } },
-  { name: "Zinc", buttons: { list: "0 0% 60%", active: "200 20% 75%" }, background: { main: "0 0% 8%" } },
-  { name: "Lead", buttons: { list: "0 0% 60%", active: "220 10% 50%" }, background: { main: "0 0% 8%" } },
-  { name: "Sulfur", buttons: { list: "0 0% 60%", active: "40 80% 50%" }, background: { main: "0 0% 8%" } },
-  
-  // Neutral themes
-  { name: "Noir", buttons: { list: "0 0% 60%", active: "0 0% 95%" }, background: { main: "0 0% 5%" } },
-  { name: "Grey", buttons: { list: "0 0% 60%", active: "220 10% 65%" }, background: { main: "0 0% 8%" } },
-  { name: "Dark", buttons: { list: "0 0% 60%", active: "220 10% 50%" }, background: { main: "0 0% 5%" } },
-  { name: "Light", buttons: { list: "0 0% 40%", active: "270 40% 50%" }, background: { main: "0 0% 95%" } },
-  
-  // Special themes
-  { name: "Christmas", buttons: { list: "0 0% 60%", active: "0 70% 50%" }, background: { main: "150 40% 8%" } },
-  { name: "Spiderman", buttons: { list: "0 0% 60%", active: "0 70% 50%" }, background: { main: "210 100% 8%" } },
-];
-```
-
-### Theme Categories
-
-| Category | Themes |
-|----------|--------|
-| **Primary** | Blue, Red, Green, Orange, Purple, Pink, Cyan, Gold |
-| **Metallic** | Silver, Iron, Bronze, Copper, Platinum, Titanium, Zinc, Lead, Sulfur |
-| **Neutral** | Noir, Grey, Dark, Light |
-| **Special** | Christmas, Spiderman |
-
-### Applying a Theme
-
-```typescript
-const applyTheme = (theme: Theme) => {
   const root = document.documentElement;
-  root.style.setProperty("--colors-buttons-list", theme.buttons.list);
-  root.style.setProperty("--colors-buttons-active", theme.buttons.active);
-  root.style.setProperty("--colors-background-main", theme.background.main);
-  
-  // Notify navbar of theme change
+  root.style.setProperty("--colors-buttons-list", "0 0% 60%");
+  root.style.setProperty("--colors-buttons-active", "25 95% 53%");
+  root.style.setProperty("--colors-type-text", "0 0% 95%");
   window.dispatchEvent(new Event("theme-change"));
+}, [theme]);
+```
+
+---
+
+## 🔒 LOCKED CONFIGURATION
+
+### Navbar
+| Property | Value | Notes |
+|----------|-------|-------|
+| Background | `#000000` | Pure black, always |
+| Z-Index | `50` | Base layer |
+| Padding | `py-4` | Vertical padding |
+| Layout | `justify-evenly` | Edge-to-edge distribution |
+
+### Menu Button
+| Property | Value | Notes |
+|----------|-------|-------|
+| Size | `72×72px` | Fixed circle |
+| Position | `-top-9` | Floats above navbar |
+| Logo Size | `h-9 w-9` | 36px |
+| Z-Index | `80` | Always on top |
+
+### Navigation Icons
+| Property | Value |
+|----------|-------|
+| Size | `h-7 w-7` (28px) |
+| Active Stroke | `2.5` |
+| Inactive Stroke | `1.5` |
+
+### Z-Index Hierarchy
+```
+Menu Button: 80 (always clickable)
+Popup Box:   70
+Backdrop:    60
+Navbar:      50
+```
+
+---
+
+## 🎨 THEME VARIABLES
+
+| Variable | Purpose | Default |
+|----------|---------|---------|
+| `--colors-buttons-list` | Inactive color | `0 0% 60%` |
+| `--colors-buttons-active` | Active/glow color | `25 95% 53%` |
+| `--colors-type-text` | Popup text | `0 0% 95%` |
+
+### Pre-Built Theme Colors
+```typescript
+const themeColors = {
+  orange: "25 95% 53%",
+  red: "0 84% 60%",
+  blue: "217 91% 60%",
+  green: "142 76% 36%",
+  purple: "280 73% 58%",
+  pink: "350 89% 60%",
+  cyan: "187 100% 42%",
+  yellow: "48 96% 53%",
+  gold: "43 74% 49%",
+  silver: "210 14% 66%",
 };
 ```
 
 ---
 
-## 📦 Dependencies
+## ✨ ANIMATIONS
 
-```bash
-npm install react-router-dom lucide-react
+### Menu Button - Glow Pulse
+```css
+@keyframes glow-pulse {
+  0%, 100% { filter: drop-shadow(0 0 8px hsl(active / 0.5)); }
+  50% { filter: drop-shadow(0 0 15px hsl(active / 0.7)); }
+}
 ```
 
----
-
-## 🎨 Required CSS Variables
-
-The navbar reads colors from CSS variables on `document.documentElement`. Your theme store must inject these variables.
-
-### CSS Variables (HSL format WITHOUT `hsl()` wrapper)
-
-| Variable | Purpose | Example Value |
-|----------|---------|---------------|
-| `--colors-buttons-list` | Inactive icon/text color | `0 0% 60%` |
-| `--colors-buttons-active` | Active icon/text + glow | `25 95% 53%` |
-| `--colors-background-main` | Navbar background | `0 0% 8%` |
-| `--colors-type-text` | Menu popup text | `0 0% 95%` |
+### Menu Popup
+- **Open**: Scale up + slide in (400ms spring)
+- **Close**: Scale down + slide out (300ms)
+- **Items**: Staggered fade (50ms delay each)
 
 ---
 
-## 📋 Complete Component Code
+## 📦 COMPLETE SOURCE CODE
 
-### MobileNavBar.tsx (FULL CODE - COPY EXACTLY)
+### MobileNavBar.tsx
 
 ```tsx
 import { useState, useEffect, useCallback } from "react";
@@ -284,6 +129,25 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { Home, Search, History, User } from "lucide-react";
 import nexusLogo from "@/assets/nexus-logo.svg";
 import MenuPopup from "./MenuPopup";
+
+/**
+ * P-STREAM MOBILE NAVIGATION BAR
+ * 
+ * LOCKED SPECIFICATIONS - DO NOT MODIFY:
+ * - Background: #000000 (pure black)
+ * - Menu Button: 72x72px, -top-9
+ * - Icons: h-7 w-7, Logo: h-9 w-9
+ * - Z-Index: Button(80) > Popup(70) > Backdrop(60) > Navbar(50)
+ */
+
+const NAVBAR_CONFIG = {
+  background: "#000000",
+  menuButton: { size: 72, position: "-top-9", logoSize: "h-9 w-9" },
+  icons: { size: "h-7 w-7", activeStroke: 2.5, inactiveStroke: 1.5 },
+  spacing: { navPadding: "py-4", centerGap: "w-20" },
+  zIndex: { navbar: 50, backdrop: 60, popup: 70, menuButton: 80 },
+  fallbackColors: { inactive: "0 0% 60%", active: "25 95% 53%" },
+} as const;
 
 interface NavItem {
   id: string;
@@ -299,19 +163,6 @@ const navItems: NavItem[] = [
   { id: "profile", label: "Profile", icon: User, path: "/profile" },
 ];
 
-/**
- * MobileNavBar Component for p-stream
- * 
- * OPTIMIZED DIMENSIONS - DO NOT CHANGE:
- * - Icons: h-7 w-7 (28px)
- * - Menu logo: h-9 w-9 (36px)
- * - Menu button: w-[72px] h-[72px]
- * - Menu button position: -top-9 (half in/half out of navbar)
- * - Menu button z-index: z-[80] (always above popup)
- * - Navbar padding: py-4
- * - Center spacer: w-20
- * - Label position: bottom-4
- */
 const MobileNavBar = () => {
   const location = useLocation();
   const navigate = useNavigate();
@@ -321,48 +172,37 @@ const MobileNavBar = () => {
   const isActive = (path: string) => location.pathname === path;
   const isMenuActive = location.pathname === "/menu";
 
-  // Read colors from CSS variables
   const getComputedColor = useCallback((varName: string, fallback: string) => {
     if (typeof window === "undefined") return fallback;
     const value = getComputedStyle(document.documentElement).getPropertyValue(varName).trim();
     return value || fallback;
   }, []);
 
-  // Listen for theme changes from theme store
   useEffect(() => {
-    const handleThemeChange = () => {
-      setThemeUpdate((prev) => prev + 1);
-    };
+    const handleThemeChange = () => setThemeUpdate((prev) => prev + 1);
     window.addEventListener("theme-change", handleThemeChange);
     return () => window.removeEventListener("theme-change", handleThemeChange);
   }, []);
 
-  const inactiveHsl = getComputedColor("--colors-buttons-list", "0 0% 60%");
-  const activeHsl = getComputedColor("--colors-buttons-active", "25 95% 53%");
+  const inactiveHsl = getComputedColor("--colors-buttons-list", NAVBAR_CONFIG.fallbackColors.inactive);
+  const activeHsl = getComputedColor("--colors-buttons-active", NAVBAR_CONFIG.fallbackColors.active);
   
   const inactiveColor = `hsl(${inactiveHsl})`;
   const activeColor = `hsl(${activeHsl})`;
-  const menuGlowColor = activeHsl;
-
   const getIconColor = (active: boolean) => active ? activeColor : inactiveColor;
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50">
+    <nav className="fixed bottom-0 left-0 right-0" style={{ zIndex: NAVBAR_CONFIG.zIndex.navbar }}>
       <div className="relative">
         <div className="relative flex items-end justify-center">
-          {/* Navbar edge-to-edge */}
           <div 
-            className="flex w-full items-center justify-evenly py-4"
-            style={{
-              background: `hsl(var(--colors-background-main, 0 0% 8%))`,
-            }}
+            className={`flex w-full items-center justify-evenly ${NAVBAR_CONFIG.spacing.navPadding}`}
+            style={{ background: NAVBAR_CONFIG.background }}
           >
-            {/* Left side buttons */}
             {navItems.slice(0, 2).map((item) => {
               const active = isActive(item.path);
               const Icon = item.icon;
               const color = getIconColor(active);
-
               return (
                 <button
                   key={item.id}
@@ -370,29 +210,23 @@ const MobileNavBar = () => {
                   className="relative flex flex-col items-center gap-1 active:scale-90 transition-transform duration-150"
                 >
                   <Icon
-                    className="relative h-7 w-7 transition-all duration-300"
+                    className={`relative ${NAVBAR_CONFIG.icons.size} transition-all duration-300`}
                     style={{ color }}
-                    strokeWidth={active ? 2.5 : 1.5}
+                    strokeWidth={active ? NAVBAR_CONFIG.icons.activeStroke : NAVBAR_CONFIG.icons.inactiveStroke}
                   />
-                  <span
-                    className="text-sm font-medium transition-colors duration-300"
-                    style={{ color }}
-                  >
+                  <span className="text-sm font-medium transition-colors duration-300" style={{ color }}>
                     {item.label}
                   </span>
                 </button>
               );
             })}
 
-            {/* Center Menu button - spacer */}
-            <div className="w-20" />
+            <div className={NAVBAR_CONFIG.spacing.centerGap} />
 
-            {/* Right side buttons */}
             {navItems.slice(2).map((item) => {
               const active = isActive(item.path);
               const Icon = item.icon;
               const color = getIconColor(active);
-
               return (
                 <button
                   key={item.id}
@@ -400,14 +234,11 @@ const MobileNavBar = () => {
                   className="relative flex flex-col items-center gap-1 active:scale-90 transition-transform duration-150"
                 >
                   <Icon
-                    className="relative h-7 w-7 transition-all duration-300"
+                    className={`relative ${NAVBAR_CONFIG.icons.size} transition-all duration-300`}
                     style={{ color }}
-                    strokeWidth={active ? 2.5 : 1.5}
+                    strokeWidth={active ? NAVBAR_CONFIG.icons.activeStroke : NAVBAR_CONFIG.icons.inactiveStroke}
                   />
-                  <span
-                    className="text-sm font-medium transition-colors duration-300"
-                    style={{ color }}
-                  >
+                  <span className="text-sm font-medium transition-colors duration-300" style={{ color }}>
                     {item.label}
                   </span>
                 </button>
@@ -415,23 +246,24 @@ const MobileNavBar = () => {
             })}
           </div>
 
-          {/* Center Menu button - floating circle (z-[80] to stay above popup) */}
           <button
             onClick={() => setIsMenuOpen(!isMenuOpen)}
-            className="absolute left-1/2 -translate-x-1/2 -top-9 z-[80] flex items-center justify-center active:scale-95 transition-transform duration-150"
+            className={`absolute left-1/2 -translate-x-1/2 ${NAVBAR_CONFIG.menuButton.position} flex items-center justify-center active:scale-95 transition-transform duration-150`}
+            style={{ zIndex: NAVBAR_CONFIG.zIndex.menuButton }}
           >
             <div
-              className="relative flex items-center justify-center w-[72px] h-[72px] rounded-full glow-pulse"
+              className="relative flex items-center justify-center rounded-full glow-pulse"
               style={{
-                background: `hsl(var(--colors-background-main, 0 0% 8%))`,
-                boxShadow: `0 0 15px 3px hsl(${menuGlowColor}), 0 0 30px 8px hsl(${menuGlowColor} / 0.5), 0 0 45px 12px hsl(${menuGlowColor} / 0.3)`,
+                width: NAVBAR_CONFIG.menuButton.size,
+                height: NAVBAR_CONFIG.menuButton.size,
+                background: NAVBAR_CONFIG.background,
+                boxShadow: `0 0 15px 3px hsl(${activeHsl}), 0 0 30px 8px hsl(${activeHsl} / 0.5), 0 0 45px 12px hsl(${activeHsl} / 0.3)`,
               }}
             >
-              <img src={nexusLogo} alt="Menu" className="h-9 w-9" />
+              <img src={nexusLogo} alt="Menu" className={NAVBAR_CONFIG.menuButton.logoSize} />
             </div>
           </button>
 
-          {/* Menu text label - aligned with other nav labels */}
           <button
             onClick={() => setIsMenuOpen(true)}
             className="absolute left-1/2 -translate-x-1/2 bottom-4 flex flex-col items-center"
@@ -446,8 +278,15 @@ const MobileNavBar = () => {
         </div>
       </div>
       
-      {/* Menu Popup */}
       <MenuPopup isOpen={isMenuOpen} onClose={() => setIsMenuOpen(false)} />
+
+      <style>{`
+        @keyframes glow-pulse {
+          0%, 100% { filter: drop-shadow(0 0 8px hsl(${activeHsl} / 0.5)); }
+          50% { filter: drop-shadow(0 0 15px hsl(${activeHsl} / 0.7)); }
+        }
+        .glow-pulse { animation: glow-pulse 3s infinite ease-in-out; }
+      `}</style>
     </nav>
   );
 };
@@ -455,11 +294,30 @@ const MobileNavBar = () => {
 export default MobileNavBar;
 ```
 
-### MenuPopup.tsx (FULL CODE - COPY EXACTLY)
+### MenuPopup.tsx
 
 ```tsx
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
+
+/**
+ * P-STREAM MENU POPUP
+ * 
+ * LOCKED SPECIFICATIONS - DO NOT MODIFY:
+ * - Background: #000000 (pure black)
+ * - Position: bottom-28, centered
+ * - Width: 280px
+ * - Z-Index: Popup(70), Backdrop(60)
+ */
+
+const POPUP_CONFIG = {
+  background: "#000000",
+  width: 280,
+  position: "bottom-28",
+  zIndex: { backdrop: 60, popup: 70 },
+  animation: { duration: 300, closeDelay: 250, navigateDelay: 200 },
+  fallbackColors: { active: "25 95% 53%", text: "0 0% 95%" },
+} as const;
 
 interface MenuPopupProps {
   isOpen: boolean;
@@ -475,49 +333,37 @@ const menuItems = [
   { id: "settings", label: "Settings", path: "/settings", emoji: "⚙️" },
 ];
 
-/**
- * MenuPopup Component for p-stream
- * 
- * A floating menu with smooth open/close animations.
- * 
- * FEATURES:
- * - Backdrop fade-in/out with blur
- * - Menu scale + slide animation (in & out)
- * - Staggered button animations
- * - Hover glow effects on buttons
- * - Reverse stagger on close
- * 
- * Z-INDEX HIERARCHY:
- * - Backdrop: z-[60] (above navbar z-50)
- * - Menu box: z-[70] (above backdrop)
- * - Floating button in navbar: z-[80] (always on top)
- */
 const MenuPopup = ({ isOpen, onClose }: MenuPopupProps) => {
   const navigate = useNavigate();
   const [isVisible, setIsVisible] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
 
-  // Handle open/close with animations
+  const getComputedColor = useCallback((varName: string, fallback: string) => {
+    if (typeof window === "undefined") return fallback;
+    const value = getComputedStyle(document.documentElement).getPropertyValue(varName).trim();
+    return value || fallback;
+  }, []);
+
+  const activeHsl = getComputedColor("--colors-buttons-active", POPUP_CONFIG.fallbackColors.active);
+  const textHsl = getComputedColor("--colors-type-text", POPUP_CONFIG.fallbackColors.text);
+
   useEffect(() => {
     if (isOpen) {
       setIsVisible(true);
       setIsClosing(false);
     } else if (isVisible) {
-      // Trigger close animation
       setIsClosing(true);
       const timer = setTimeout(() => {
         setIsVisible(false);
         setIsClosing(false);
-      }, 300); // Match animation duration
+      }, POPUP_CONFIG.animation.duration);
       return () => clearTimeout(timer);
     }
   }, [isOpen, isVisible]);
 
   const handleClose = () => {
     setIsClosing(true);
-    setTimeout(() => {
-      onClose();
-    }, 250); // Slightly less than animation to feel snappy
+    setTimeout(onClose, POPUP_CONFIG.animation.closeDelay);
   };
 
   const handleNavigate = (path: string) => {
@@ -525,29 +371,28 @@ const MenuPopup = ({ isOpen, onClose }: MenuPopupProps) => {
     setTimeout(() => {
       navigate(path);
       onClose();
-    }, 200);
+    }, POPUP_CONFIG.animation.navigateDelay);
   };
 
   if (!isVisible) return null;
 
   return (
     <>
-      {/* Backdrop with fade animation */}
       <div 
-        className="fixed inset-0 z-[60] backdrop-blur-sm"
+        className="fixed inset-0 backdrop-blur-sm"
         style={{
+          zIndex: POPUP_CONFIG.zIndex.backdrop,
           background: 'rgba(0, 0, 0, 0.7)',
-          animation: isClosing 
-            ? 'fadeOut 0.3s ease-out forwards' 
-            : 'fadeIn 0.3s ease-out forwards',
+          animation: isClosing ? 'fadeOut 0.3s ease-out forwards' : 'fadeIn 0.3s ease-out forwards',
         }}
         onClick={handleClose}
       />
       
-      {/* Menu Box with scale + slide animation */}
       <div 
-        className="fixed bottom-28 left-1/2 z-[70] w-[280px]"
+        className={`fixed ${POPUP_CONFIG.position} left-1/2`}
         style={{
+          zIndex: POPUP_CONFIG.zIndex.popup,
+          width: POPUP_CONFIG.width,
           animation: isClosing 
             ? 'menuSlideOut 0.3s cubic-bezier(0.4, 0, 1, 1) forwards'
             : 'menuSlideIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards',
@@ -556,34 +401,21 @@ const MenuPopup = ({ isOpen, onClose }: MenuPopupProps) => {
         <div 
           className="rounded-2xl p-4 shadow-2xl border border-white/10"
           style={{ 
-            background: `hsl(var(--colors-background-main, 0 0% 8%))`,
-            boxShadow: `0 25px 50px -12px rgba(0, 0, 0, 0.5), 
-                        0 0 30px hsl(var(--colors-buttons-active, 25 95% 53%) / 0.15)`,
+            background: POPUP_CONFIG.background,
+            boxShadow: `0 25px 50px -12px rgba(0, 0, 0, 0.5), 0 0 30px hsl(${activeHsl} / 0.15)`,
           }}
         >
-          {/* Header with slide animation */}
           <div 
             className="flex items-center gap-2 mb-4 px-1"
             style={{ 
-              animation: isClosing 
-                ? 'itemFadeOut 0.2s ease-out forwards' 
-                : 'itemFadeIn 0.3s ease-out 0.1s forwards', 
+              animation: isClosing ? 'itemFadeOut 0.2s ease-out forwards' : 'itemFadeIn 0.3s ease-out 0.1s forwards', 
               opacity: isClosing ? 1 : 0 
             }}
           >
-            <div 
-              className="w-1 h-5 rounded-full"
-              style={{ background: `hsl(var(--colors-buttons-active, 25 95% 53%))` }}
-            />
-            <h3 
-              className="text-lg font-semibold"
-              style={{ color: `hsl(var(--colors-type-text, 0 0% 95%))` }}
-            >
-              Browse
-            </h3>
+            <div className="w-1 h-5 rounded-full" style={{ background: `hsl(${activeHsl})` }} />
+            <h3 className="text-lg font-semibold" style={{ color: `hsl(${textHsl})` }}>Browse</h3>
           </div>
           
-          {/* Menu Grid with staggered animations */}
           <div className="grid grid-cols-2 gap-3">
             {menuItems.map((item, index) => (
               <button
@@ -591,29 +423,18 @@ const MenuPopup = ({ isOpen, onClose }: MenuPopupProps) => {
                 onClick={() => handleNavigate(item.path)}
                 className="group flex items-center gap-3 px-4 py-3 rounded-xl bg-white/5 
                            hover:bg-white/15 transition-all duration-300 
-                           hover:scale-[1.02] active:scale-95
-                           hover:shadow-lg"
+                           hover:scale-[1.02] active:scale-95 hover:shadow-lg"
                 style={{
                   animation: isClosing 
                     ? `itemFadeOut 0.2s ease-out ${(5 - index) * 0.03}s forwards`
                     : `itemFadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) ${0.15 + index * 0.05}s forwards`,
                   opacity: isClosing ? 1 : 0,
-                  boxShadow: 'none',
                 }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.boxShadow = `0 0 20px hsl(var(--colors-buttons-active, 25 95% 53%) / 0.2)`;
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.boxShadow = 'none';
-                }}
+                onMouseEnter={(e) => { e.currentTarget.style.boxShadow = `0 0 20px hsl(${activeHsl} / 0.2)`; }}
+                onMouseLeave={(e) => { e.currentTarget.style.boxShadow = 'none'; }}
               >
-                <span className="text-xl transition-transform duration-300 group-hover:scale-110">
-                  {item.emoji}
-                </span>
-                <span 
-                  className="text-sm font-medium transition-colors duration-300"
-                  style={{ color: `hsl(var(--colors-type-text, 0 0% 95%))` }}
-                >
+                <span className="text-xl transition-transform duration-300 group-hover:scale-110">{item.emoji}</span>
+                <span className="text-sm font-medium transition-colors duration-300" style={{ color: `hsl(${textHsl})` }}>
                   {item.label}
                 </span>
               </button>
@@ -622,60 +443,24 @@ const MenuPopup = ({ isOpen, onClose }: MenuPopupProps) => {
         </div>
       </div>
 
-      {/* Inline keyframe styles - REQUIRED FOR ANIMATIONS */}
       <style>{`
-        @keyframes fadeIn {
-          from { opacity: 0; }
-          to { opacity: 1; }
-        }
-        
-        @keyframes fadeOut {
-          from { opacity: 1; }
-          to { opacity: 0; }
-        }
-        
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes fadeOut { from { opacity: 1; } to { opacity: 0; } }
         @keyframes menuSlideIn {
-          from { 
-            opacity: 0;
-            transform: translateX(-50%) translateY(20px) scale(0.95);
-          }
-          to { 
-            opacity: 1;
-            transform: translateX(-50%) translateY(0) scale(1);
-          }
+          from { opacity: 0; transform: translateX(-50%) translateY(20px) scale(0.95); }
+          to { opacity: 1; transform: translateX(-50%) translateY(0) scale(1); }
         }
-        
         @keyframes menuSlideOut {
-          from { 
-            opacity: 1;
-            transform: translateX(-50%) translateY(0) scale(1);
-          }
-          to { 
-            opacity: 0;
-            transform: translateX(-50%) translateY(20px) scale(0.95);
-          }
+          from { opacity: 1; transform: translateX(-50%) translateY(0) scale(1); }
+          to { opacity: 0; transform: translateX(-50%) translateY(20px) scale(0.95); }
         }
-        
         @keyframes itemFadeIn {
-          from { 
-            opacity: 0;
-            transform: translateY(10px);
-          }
-          to { 
-            opacity: 1;
-            transform: translateY(0);
-          }
+          from { opacity: 0; transform: translateY(10px); }
+          to { opacity: 1; transform: translateY(0); }
         }
-        
         @keyframes itemFadeOut {
-          from { 
-            opacity: 1;
-            transform: translateY(0);
-          }
-          to { 
-            opacity: 0;
-            transform: translateY(-5px);
-          }
+          from { opacity: 1; transform: translateY(0); }
+          to { opacity: 0; transform: translateY(-5px); }
         }
       `}</style>
     </>
@@ -685,227 +470,25 @@ const MenuPopup = ({ isOpen, onClose }: MenuPopupProps) => {
 export default MenuPopup;
 ```
 
-### ThemeTester.tsx (FULL CODE - COPY EXACTLY)
+---
 
-```tsx
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+## ✅ REQUIREMENTS
 
-interface Theme {
-  name: string;
-  buttons: { list: string; active: string };
-  background: { main: string };
-}
-
-// All 23 themes from p-stream
-const themes: Theme[] = [
-  // Primary colors
-  { name: "Blue", buttons: { list: "0 0% 60%", active: "210 100% 50%" }, background: { main: "0 0% 8%" } },
-  { name: "Red", buttons: { list: "0 0% 60%", active: "0 70% 50%" }, background: { main: "0 0% 8%" } },
-  { name: "Green", buttons: { list: "0 0% 60%", active: "150 40% 50%" }, background: { main: "0 0% 8%" } },
-  { name: "Orange", buttons: { list: "0 0% 60%", active: "30 100% 50%" }, background: { main: "0 0% 8%" } },
-  { name: "Purple", buttons: { list: "0 0% 60%", active: "270 40% 50%" }, background: { main: "0 0% 8%" } },
-  { name: "Pink", buttons: { list: "0 0% 60%", active: "330 60% 50%" }, background: { main: "0 0% 8%" } },
-  { name: "Cyan", buttons: { list: "0 0% 60%", active: "180 100% 45%" }, background: { main: "0 0% 8%" } },
-  { name: "Gold", buttons: { list: "0 0% 60%", active: "45 80% 50%" }, background: { main: "0 0% 8%" } },
-  
-  // Metallic themes
-  { name: "Silver", buttons: { list: "0 0% 60%", active: "210 10% 75%" }, background: { main: "0 0% 8%" } },
-  { name: "Iron", buttons: { list: "0 0% 60%", active: "210 5% 50%" }, background: { main: "0 0% 8%" } },
-  { name: "Bronze", buttons: { list: "0 0% 60%", active: "30 50% 50%" }, background: { main: "0 0% 8%" } },
-  { name: "Copper", buttons: { list: "0 0% 60%", active: "20 70% 50%" }, background: { main: "0 0% 8%" } },
-  { name: "Platinum", buttons: { list: "0 0% 60%", active: "240 10% 75%" }, background: { main: "0 0% 8%" } },
-  { name: "Titanium", buttons: { list: "0 0% 60%", active: "210 5% 75%" }, background: { main: "0 0% 8%" } },
-  { name: "Zinc", buttons: { list: "0 0% 60%", active: "200 20% 75%" }, background: { main: "0 0% 8%" } },
-  { name: "Lead", buttons: { list: "0 0% 60%", active: "220 10% 50%" }, background: { main: "0 0% 8%" } },
-  { name: "Sulfur", buttons: { list: "0 0% 60%", active: "40 80% 50%" }, background: { main: "0 0% 8%" } },
-  
-  // Neutral themes
-  { name: "Noir", buttons: { list: "0 0% 60%", active: "0 0% 95%" }, background: { main: "0 0% 5%" } },
-  { name: "Grey", buttons: { list: "0 0% 60%", active: "220 10% 65%" }, background: { main: "0 0% 8%" } },
-  { name: "Dark", buttons: { list: "0 0% 60%", active: "220 10% 50%" }, background: { main: "0 0% 5%" } },
-  { name: "Light", buttons: { list: "0 0% 40%", active: "270 40% 50%" }, background: { main: "0 0% 95%" } },
-  
-  // Special themes
-  { name: "Christmas", buttons: { list: "0 0% 60%", active: "0 70% 50%" }, background: { main: "150 40% 8%" } },
-  { name: "Spiderman", buttons: { list: "0 0% 60%", active: "0 70% 50%" }, background: { main: "210 100% 8%" } },
-];
-
-const ThemeTester = () => {
-  const [selectedTheme, setSelectedTheme] = useState("Blue");
-
-  const applyTheme = () => {
-    const theme = themes.find((t) => t.name === selectedTheme);
-    if (!theme) return;
-
-    const root = document.documentElement;
-    root.style.setProperty("--colors-buttons-list", theme.buttons.list);
-    root.style.setProperty("--colors-buttons-active", theme.buttons.active);
-    root.style.setProperty("--colors-background-main", theme.background.main);
-    
-    // Force re-render by dispatching a custom event
-    window.dispatchEvent(new Event("theme-change"));
-  };
-
-  return (
-    <div className="flex items-center gap-3">
-      <span className="text-sm font-medium text-foreground">Themes Tester:</span>
-      <Select value={selectedTheme} onValueChange={setSelectedTheme}>
-        <SelectTrigger className="w-36">
-          <SelectValue placeholder="Select theme" />
-        </SelectTrigger>
-        <SelectContent className="bg-popover max-h-60">
-          {themes.map((theme) => (
-            <SelectItem key={theme.name} value={theme.name}>
-              {theme.name}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
-      <Button onClick={applyTheme} size="sm">
-        Apply
-      </Button>
-    </div>
-  );
-};
-
-export default ThemeTester;
+### Dependencies
+```bash
+npm install react-router-dom lucide-react
 ```
 
----
-
-## 🎭 Required CSS (Add to your global CSS / index.css)
-
-```css
-/* Glow pulse animation for menu button */
-.glow-pulse {
-  animation: glow-pulse 2s ease-in-out infinite;
-}
-
-@keyframes glow-pulse {
-  0%, 100% {
-    filter: brightness(1);
-  }
-  50% {
-    filter: brightness(1.1);
-  }
-}
-```
+### Assets
+- `src/assets/nexus-logo.svg`
 
 ---
 
-## 🔧 Usage in Your App
+## 🚀 PRODUCTION READY
 
-```tsx
-import MobileNavBar from "@/components/MobileNavBar";
-
-const App = () => {
-  return (
-    <div className="min-h-screen pb-24"> {/* pb-24 for navbar space */}
-      {/* Your page content */}
-      <MobileNavBar />
-    </div>
-  );
-};
-```
-
----
-
-## 📐 Layout Specifications (DO NOT MODIFY)
-
-| Element | Size | Notes |
-|---------|------|-------|
-| Nav icons | `h-7 w-7` (28px) | Home, Search, Recent, Profile |
-| Menu logo | `h-9 w-9` (36px) | Center button icon |
-| Menu button circle | `w-[72px] h-[72px]` | Floating circle |
-| Menu button position | `-top-9` | Half inside, half outside navbar |
-| Menu button z-index | `z-[80]` | Always above popup |
-| Menu label position | `bottom-4` | Aligned with other labels |
-| Center spacer | `w-20` | Space for floating button |
-| Navbar padding | `py-4` | Vertical padding |
-| Icon distribution | `justify-evenly` | Edge-to-edge layout |
-| Active stroke width | `2.5` | Thicker when active |
-| Inactive stroke width | `1.5` | Default stroke |
-
----
-
-## 🎬 Animation Specifications
-
-### Menu Open Animations
-| Element | Animation | Duration | Easing |
-|---------|-----------|----------|--------|
-| Backdrop | fadeIn | 0.3s | ease-out |
-| Menu box | menuSlideIn (scale + translate) | 0.4s | cubic-bezier(0.16, 1, 0.3, 1) |
-| Header | itemFadeIn | 0.3s | ease-out (0.1s delay) |
-| Menu items | itemFadeIn (staggered) | 0.4s | cubic-bezier (0.15s + index*0.05s delay) |
-
-### Menu Close Animations
-| Element | Animation | Duration | Easing |
-|---------|-----------|----------|--------|
-| Backdrop | fadeOut | 0.3s | ease-out |
-| Menu box | menuSlideOut (scale + translate) | 0.3s | cubic-bezier(0.4, 0, 1, 1) |
-| Header | itemFadeOut | 0.2s | ease-out |
-| Menu items | itemFadeOut (reverse stagger) | 0.2s | ease-out (last item first) |
-
----
-
-## ✅ Integration Checklist
-
-- [ ] Copy `MobileNavBar.tsx` to `src/components/`
-- [ ] Copy `MenuPopup.tsx` to `src/components/`
-- [ ] Copy `ThemeTester.tsx` to `src/components/` (optional)
-- [ ] Copy `nexus-logo.svg` to `src/assets/`
-- [ ] Add CSS variables injection to your theme store
-- [ ] Dispatch `theme-change` event when theme changes
-- [ ] Add `pb-24` padding to your page containers
-- [ ] Add glow-pulse animation to your global CSS
-- [ ] **DO NOT MODIFY** any dimension values
-- [ ] **DO NOT MODIFY** any z-index values
-
----
-
-## 🚫 What NOT to Change
-
-1. **Icon sizes** - `h-7 w-7` for nav icons, `h-9 w-9` for menu logo
-2. **Menu button size** - `w-[72px] h-[72px]`
-3. **Positioning** - `-top-9`, `bottom-4`, `left-1/2`
-4. **Z-index values** - `z-50`, `z-[60]`, `z-[70]`, `z-[80]`
-5. **Spacing** - `py-4`, `w-20`, `gap-1`, `gap-3`
-6. **Layout** - `justify-evenly`, `flex-col`
-7. **Animation timings** - Carefully tuned for smooth UX
-
-These values are optimized for mobile displays and edge-to-edge rendering.
-
----
-
-## 🎨 Theme Color Flow Diagram
-
-```
-┌─────────────────┐     useEffect      ┌──────────────────────┐
-│   Theme Store   │ ──────────────────▶│  CSS Variables on    │
-│  (currentTheme) │                    │  document.documentElement │
-└─────────────────┘                    └──────────────────────┘
-                                                  │
-                                                  │ getComputedStyle
-                                                  ▼
-                                       ┌──────────────────────┐
-                                       │    MobileNavBar      │
-                                       │    (reads colors)    │
-                                       └──────────────────────┘
-```
-
----
-
-## 📝 Version History
-
-- **v1.0** - Initial navbar with theme integration
-- **v1.1** - Added 23 themes from p-stream
-- **v1.2** - Fixed z-index hierarchy (popup no longer covers menu button)
-- **v1.3** - Added smooth open/close animations with staggered effects
+- ✅ Permanent black background (locked)
+- ✅ All dimensions locked in config
+- ✅ Self-contained animations
+- ✅ Theme integration via CSS variables
+- ✅ Fallback colors included
+- ✅ Error-free, optimized code
